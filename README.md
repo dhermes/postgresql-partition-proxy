@@ -9,3 +9,15 @@ be sharded by tenant. Using PostgreSQL foreign data wrappers, we can
 - Home the data for the tenant / schema on a single physical shard
 - Use the pass through PostgreSQL instance to relay queries to the
   physical shard
+
+## Development
+
+```
+$ make  # Or `make help`
+Makefile for `postgresql-partition-proxy` experiment
+
+Terraform-specific Targets:
+   make start-containers    Start PostgreSQL Docker containers.
+   make stop-containers     Stop PostgreSQL Docker containers.
+
+```
