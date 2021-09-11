@@ -16,6 +16,10 @@ help:
 	@echo '   make psql-cyberdyne          Connects to currently running Cyberdyne PostgreSQL DB via `psql` as app user'
 	@echo '   make psql-initech            Connects to currently running Initech PostgreSQL DB via `psql` as app user'
 	@echo '   make migrations              Runs database schema migrations in all PostgreSQL DB instances'
+	@echo '   make show-logs-veneer        Show log of all statements in Veneer PostgreSQL DB since starting.'
+	@echo '   make show-logs-bluth-co      Show log of all statements in Bluth Co PostgreSQL DB since starting.'
+	@echo '   make show-logs-cyberdyne     Show log of all statements in Cyberdyne PostgreSQL DB since starting.'
+	@echo '   make show-logs-initech       Show log of all statements in Initech PostgreSQL DB since starting.'
 	@echo ''
 
 ################################################################################
@@ -102,6 +106,22 @@ _migrations-veneer: _require-psql
 
 .PHONY: migrations
 migrations: _migrations-bluth-co _migrations-cyberdyne _migrations-initech _migrations-veneer
+
+.PHONY: show-logs-veneer
+show-logs-veneer:
+	@DB_CONTAINER_NAME=dev-postgres-veneer ./_bin/show_db_logs.sh
+
+.PHONY: show-logs-bluth-co
+show-logs-bluth-co:
+	@DB_CONTAINER_NAME=dev-postgres-bluth-co ./_bin/show_db_logs.sh
+
+.PHONY: show-logs-cyberdyne
+show-logs-cyberdyne:
+	@DB_CONTAINER_NAME=dev-postgres-cyberdyne ./_bin/show_db_logs.sh
+
+.PHONY: show-logs-initech
+show-logs-initech:
+	@DB_CONTAINER_NAME=dev-postgres-initech ./_bin/show_db_logs.sh
 
 ################################################################################
 # Internal / Doctor Targets

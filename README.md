@@ -109,6 +109,10 @@ Development Database-specific Targets:
    make psql-cyberdyne          Connects to currently running Cyberdyne PostgreSQL DB via `psql` as app user
    make psql-initech            Connects to currently running Initech PostgreSQL DB via `psql` as app user
    make migrations              Runs database schema migrations in all PostgreSQL DB instances
+   make show-logs-veneer        Show log of all statements in Veneer PostgreSQL DB since starting.
+   make show-logs-bluth-co      Show log of all statements in Bluth Co PostgreSQL DB since starting.
+   make show-logs-cyberdyne     Show log of all statements in Cyberdyne PostgreSQL DB since starting.
+   make show-logs-initech       Show log of all statements in Initech PostgreSQL DB since starting.
 
 ```
 
