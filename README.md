@@ -28,3 +28,9 @@ Development Database-specific Targets:
    make psql-initech            Connects to currently running Initech PostgreSQL DB via `psql` as app user
 
 ```
+
+## Resources
+
+-   PostgreSQL's Foreign Data Wrapper [post][1] from thoughtbot
+
+[1]: https://thoughtbot.com/blog/postgres-foreign-data-wrapper
