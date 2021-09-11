@@ -17,7 +17,14 @@ $ make  # Or `make help`
 Makefile for `postgresql-partition-proxy` experiment
 
 Terraform-specific Targets:
-   make start-containers    Start PostgreSQL Docker containers.
-   make stop-containers     Stop PostgreSQL Docker containers.
+   make start-containers        Start PostgreSQL Docker containers.
+   make stop-containers         Stop PostgreSQL Docker containers.
+   make initialize-databases    Initialize the database, schema, roles and grants in the PostgreSQL instances
+   make teardown-databases      Teardown the database, schema, roles and grants in the PostgreSQL instances
+Development Database-specific Targets:
+   make psql-veneer             Connects to currently running Veneer PostgreSQL DB via `psql` as app user
+   make psql-bluth-co           Connects to currently running Bluth Co PostgreSQL DB via `psql` as app user
+   make psql-cyberdyne          Connects to currently running Cyberdyne PostgreSQL DB via `psql` as app user
+   make psql-initech            Connects to currently running Initech PostgreSQL DB via `psql` as app user
 
 ```
