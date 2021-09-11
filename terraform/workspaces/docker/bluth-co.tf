@@ -1,5 +1,5 @@
 module "bluth_co" {
-  source = "../../modules/postgres-container"
+  source = "../../modules/postgresql-container"
 
   port           = "29948"
   container_name = "dev-postgres-bluth-co"

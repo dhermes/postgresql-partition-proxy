@@ -1,5 +1,5 @@
 module "veneer" {
-  source = "../../modules/postgres-container"
+  source = "../../modules/postgresql-container"
 
   port           = "14797"
   container_name = "dev-postgres-veneer"

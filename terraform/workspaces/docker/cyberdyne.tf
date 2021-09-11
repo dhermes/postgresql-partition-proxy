@@ -1,5 +1,5 @@
 module "cyberdyne" {
-  source = "../../modules/postgres-container"
+  source = "../../modules/postgresql-container"
 
   port           = "13366"
   container_name = "dev-postgres-cyberdyne"

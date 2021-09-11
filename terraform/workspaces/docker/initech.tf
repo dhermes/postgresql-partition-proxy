@@ -1,5 +1,5 @@
 module "initech" {
-  source = "../../modules/postgres-container"
+  source = "../../modules/postgresql-container"
 
   port           = "11033"
   container_name = "dev-postgres-initech"
