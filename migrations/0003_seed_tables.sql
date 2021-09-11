@@ -1,3 +1,5 @@
+BEGIN;
+----
 INSERT INTO
   authors (id, first_name, last_name)
 VALUES
@@ -7,7 +9,10 @@ VALUES
   (gen_random_uuid(), 'Ernest', 'Hemingway'),
   (gen_random_uuid(), 'Kurt', 'Vonnegut'),
   (gen_random_uuid(), 'Agatha', 'Christie'),
-  (gen_random_uuid(), 'James', 'Joyce');
+  (gen_random_uuid(), 'James', 'Joyce')
+ON CONFLICT
+  (first_name, last_name)
+DO NOTHING;
 ----
 INSERT INTO
   books (id, title, author_id, publish_date)
@@ -20,7 +25,10 @@ FROM
   authors
 WHERE
   first_name = 'Anne' AND
-  last_name = 'Rice';
+  last_name = 'Rice'
+ON CONFLICT
+  (author_id, title)
+DO NOTHING;
 ----
 INSERT INTO
   books (id, title, author_id, publish_date)
@@ -33,7 +41,10 @@ FROM
   authors
 WHERE
   first_name = 'Anne' AND
-  last_name = 'Rice';
+  last_name = 'Rice'
+ON CONFLICT
+  (author_id, title)
+DO NOTHING;
 ----
 INSERT INTO
   books (id, title, author_id, publish_date)
@@ -46,7 +57,10 @@ FROM
   authors
 WHERE
   first_name = 'Anne' AND
-  last_name = 'Rice';
+  last_name = 'Rice'
+ON CONFLICT
+  (author_id, title)
+DO NOTHING;
 ----
 INSERT INTO
   books (id, title, author_id, publish_date)
@@ -59,7 +73,10 @@ FROM
   authors
 WHERE
   first_name = 'John' AND
-  last_name = 'Steinbeck';
+  last_name = 'Steinbeck'
+ON CONFLICT
+  (author_id, title)
+DO NOTHING;
 ----
 INSERT INTO
   books (id, title, author_id, publish_date)
@@ -72,7 +89,10 @@ FROM
   authors
 WHERE
   first_name = 'JK' AND
-  last_name = 'Rowling';
+  last_name = 'Rowling'
+ON CONFLICT
+  (author_id, title)
+DO NOTHING;
 ----
 INSERT INTO
   books (id, title, author_id, publish_date)
@@ -85,7 +105,10 @@ FROM
   authors
 WHERE
   first_name = 'Agatha' AND
-  last_name = 'Christie';
+  last_name = 'Christie'
+ON CONFLICT
+  (author_id, title)
+DO NOTHING;
 ----
 INSERT INTO
   books (id, title, author_id, publish_date)
@@ -98,7 +121,10 @@ FROM
   authors
 WHERE
   first_name = 'James' AND
-  last_name = 'Joyce';
+  last_name = 'Joyce'
+ON CONFLICT
+  (author_id, title)
+DO NOTHING;
 ----
 INSERT INTO
   books (id, title, author_id, publish_date)
@@ -111,4 +137,9 @@ FROM
   authors
 WHERE
   first_name = 'James' AND
-  last_name = 'Joyce';
+  last_name = 'Joyce'
+ON CONFLICT
+  (author_id, title)
+DO NOTHING;
+----
+COMMIT;

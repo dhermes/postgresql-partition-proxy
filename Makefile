@@ -97,8 +97,12 @@ migrations-initech: _require-psql
 	PGOPTIONS="-c search_path=initech" psql "postgres://initech_admin:mnop3456@localhost:11033/initech" --file ./migrations/0002_create_books_table.sql
 	PGOPTIONS="-c search_path=initech" psql "postgres://initech_admin:mnop3456@localhost:11033/initech" --file ./migrations/0003_seed_tables.sql
 
+.PHONY: migrations-veneer
+migrations-veneer: _require-psql
+	psql "postgres://veneer_admin:abcd1234@localhost:14797/veneer" --file ./migrations/fdw.sql
+
 .PHONY: migrations
-migrations: migrations-bluth-co migrations-cyberdyne migrations-initech
+migrations: migrations-bluth-co migrations-cyberdyne migrations-initech migrations-veneer
 
 ################################################################################
 # Internal / Doctor Targets
