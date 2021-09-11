@@ -70,23 +70,25 @@ psql "postgres://veneer_app:1234abcd@localhost:14797/veneer"
 psql (13.4, server 13.3)
 Type "help" for help.
 
-veneer=> SELECT * FROM bluth_co.authors WHERE first_name = 'Ernest';
-                  id                  | first_name | last_name
---------------------------------------+------------+-----------
- 8912c6c5-9c90-4df9-8e99-01239bcf8505 | Ernest     | Hemingway
+veneer=> SELECT pg_backend_pid(), * FROM bluth_co.authors WHERE first_name = 'Ernest';
+ pg_backend_pid |                  id                  | first_name | last_name
+----------------+--------------------------------------+------------+-----------
+            389 | ed62a6c5-3ebc-41ea-a63c-ba48c400068a | Ernest     | Hemingway
 (1 row)
 
-veneer=> SELECT * FROM cyberdyne.authors WHERE first_name = 'Ernest';
-                  id                  | first_name | last_name
---------------------------------------+------------+-----------
- a9323af4-09b6-482f-87ec-54ddc4335cfc | Ernest     | Hemingway
+veneer=> SELECT pg_backend_pid(), * FROM cyberdyne.authors WHERE first_name = 'Ernest';
+ pg_backend_pid |                  id                  | first_name | last_name
+----------------+--------------------------------------+------------+-----------
+            389 | dd01165c-c228-48af-8017-5f75ac434394 | Ernest     | Hemingway
 (1 row)
 
-veneer=> SELECT * FROM initech.authors WHERE first_name = 'Ernest';
-                  id                  | first_name | last_name
---------------------------------------+------------+-----------
- 1ab14132-c706-4094-aaac-fe4d870e888d | Ernest     | Hemingway
+veneer=> SELECT pg_backend_pid(), * FROM initech.authors WHERE first_name = 'Ernest';
+ pg_backend_pid |                  id                  | first_name | last_name
+----------------+--------------------------------------+------------+-----------
+            389 | c9927c3d-16ba-4d9a-91ce-45d8dd48d003 | Ernest     | Hemingway
 (1 row)
+
+veneer=> \q
 ```
 
 ## Checking in on Performance
