@@ -202,7 +202,7 @@ $ make show-logs-bluth-co
 ```
 
 To contrast, if we do a `JOIN` for tables on two distinct physical
-shards:
+shards (which should be **ILLEGAL** as an operation in a multitenant system):
 
 ```
 $ make psql-veneer
