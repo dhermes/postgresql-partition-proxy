@@ -3,7 +3,7 @@ BEGIN;
 DROP SERVER IF EXISTS cyberdyne_server CASCADE;
 CREATE SERVER cyberdyne_server
   FOREIGN DATA WRAPPER postgres_fdw
-  OPTIONS (host 'host.docker.internal', port '13366', dbname 'cyberdyne');
+  OPTIONS (host 'dev-postgres-cyberdyne.', port '5432', dbname 'cyberdyne');
 CREATE USER MAPPING FOR veneer_admin
   SERVER cyberdyne_server
   OPTIONS (user 'cyberdyne_admin', password 'ijkl9012');

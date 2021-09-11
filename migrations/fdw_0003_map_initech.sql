@@ -3,7 +3,7 @@ BEGIN;
 DROP SERVER IF EXISTS initech_server CASCADE;
 CREATE SERVER initech_server
   FOREIGN DATA WRAPPER postgres_fdw
-  OPTIONS (host 'host.docker.internal', port '11033', dbname 'initech');
+  OPTIONS (host 'dev-postgres-initech.', port '5432', dbname 'initech');
 CREATE USER MAPPING FOR veneer_admin
   SERVER initech_server
   OPTIONS (user 'initech_admin', password 'mnop3456');

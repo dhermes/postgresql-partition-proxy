@@ -40,6 +40,6 @@ resource "docker_container" "database" {
 #       to `docker run`.
 resource "null_resource" "network_connect" {
   provisioner "local-exec" {
-    command = "docker network connect ${var.network_name} ${docker_container.database.name}"
+    command = "docker network connect ${var.network_name} ${docker_container.database.name} --alias ${docker_container.database.name}"
   }
 }

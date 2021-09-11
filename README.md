@@ -22,8 +22,8 @@ $ make  # Or `make help`
 Makefile for `postgresql-partition-proxy` experiment
 
 Usage:
-   make vet                          Run `go vet` over project source tree
-   make shellcheck                   Run `shellcheck` on all shell files in `./_bin/`
+   make clean                   Forcefully remove all generated artifacts (e.g. Terraform state files)
+   make shellcheck              Run `shellcheck` on all shell files in `./_bin/`
 Terraform-specific Targets:
    make start-containers        Start PostgreSQL Docker containers.
    make stop-containers         Stop PostgreSQL Docker containers.

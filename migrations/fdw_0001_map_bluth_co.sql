@@ -3,7 +3,7 @@ BEGIN;
 DROP SERVER IF EXISTS bluth_co_server CASCADE;
 CREATE SERVER bluth_co_server
   FOREIGN DATA WRAPPER postgres_fdw
-  OPTIONS (host 'host.docker.internal', port '29948', dbname 'bluth_co');
+  OPTIONS (host 'dev-postgres-bluth-co.', port '5432', dbname 'bluth_co');
 CREATE USER MAPPING FOR veneer_admin
   SERVER bluth_co_server
   OPTIONS (user 'bluth_co_admin', password 'efgh5678');

@@ -3,8 +3,8 @@ help:
 	@echo 'Makefile for `postgresql-partition-proxy` experiment'
 	@echo ''
 	@echo 'Usage:'
-	@echo '   make vet                          Run `go vet` over project source tree'
-	@echo '   make shellcheck                   Run `shellcheck` on all shell files in `./_bin/`'
+	@echo '   make clean                   Forcefully remove all generated artifacts (e.g. Terraform state files)'
+	@echo '   make shellcheck              Run `shellcheck` on all shell files in `./_bin/`'
 	@echo 'Terraform-specific Targets:'
 	@echo '   make start-containers        Start PostgreSQL Docker containers.'
 	@echo '   make stop-containers         Stop PostgreSQL Docker containers.'
@@ -29,12 +29,29 @@ SHELLCHECK_PRESENT := $(shell command -v shellcheck 2> /dev/null)
 PSQL_PRESENT := $(shell command -v psql 2> /dev/null)
 
 ################################################################################
-# Terraform-specific Targets
+# Generic Targets
 ################################################################################
+
+.PHONY: clean
+clean:
+	rm -f \
+	  terraform/workspaces/databases/.terraform.lock.hcl \
+	  terraform/workspaces/databases/terraform.tfstate \
+	  terraform/workspaces/databases/terraform.tfstate.backup \
+	  terraform/workspaces/docker/.terraform.lock.hcl \
+	  terraform/workspaces/docker/terraform.tfstate \
+	  terraform/workspaces/docker/terraform.tfstate.backup
+	rm -fr \
+	  terraform/workspaces/databases/.terraform/ \
+	  terraform/workspaces/docker/.terraform/
 
 .PHONY: shellcheck
 shellcheck: _require-shellcheck
 	shellcheck --exclude SC1090,SC1091 ./_bin/*.sh
+
+################################################################################
+# Terraform-specific Targets
+################################################################################
 
 .PHONY: start-containers
 start-containers:
