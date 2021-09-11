@@ -2,7 +2,7 @@ module "cyberdyne" {
   source = "../../modules/postgresql-container"
 
   port           = "13366"
-  container_name = "dev-postgres-cyberdyne"
+  container_name = "dev-postgres-shard2"
   network_name   = docker_network.ppp.name
 
   providers = {

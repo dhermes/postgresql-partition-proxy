@@ -13,9 +13,9 @@ $
 $ docker ps
 CONTAINER ID   IMAGE                      COMMAND                  CREATED              STATUS              PORTS                     NAMES
 997480aa097e   postgres:13.3-alpine3.14   "docker-entrypoint.s…"   About a minute ago   Up About a minute   0.0.0.0:14797->5432/tcp   dev-postgres-veneer
-0c94aa5e83b0   postgres:13.3-alpine3.14   "docker-entrypoint.s…"   About a minute ago   Up About a minute   0.0.0.0:29948->5432/tcp   dev-postgres-bluth-co
-ddb93e29b7af   postgres:13.3-alpine3.14   "docker-entrypoint.s…"   About a minute ago   Up About a minute   0.0.0.0:13366->5432/tcp   dev-postgres-cyberdyne
-0d047aded5a6   postgres:13.3-alpine3.14   "docker-entrypoint.s…"   About a minute ago   Up About a minute   0.0.0.0:11033->5432/tcp   dev-postgres-initech
+0c94aa5e83b0   postgres:13.3-alpine3.14   "docker-entrypoint.s…"   About a minute ago   Up About a minute   0.0.0.0:29948->5432/tcp   dev-postgres-shard1
+ddb93e29b7af   postgres:13.3-alpine3.14   "docker-entrypoint.s…"   About a minute ago   Up About a minute   0.0.0.0:13366->5432/tcp   dev-postgres-shard2
+0d047aded5a6   postgres:13.3-alpine3.14   "docker-entrypoint.s…"   About a minute ago   Up About a minute   0.0.0.0:11033->5432/tcp   dev-postgres-shard3
 ```
 
 Then actually create `{db}_admin` and `{db}_app` users in each PostgreSQL

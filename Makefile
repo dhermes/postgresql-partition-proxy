@@ -45,9 +45,9 @@ clean:
 	  terraform/workspaces/databases/.terraform/ \
 	  terraform/workspaces/docker/.terraform/
 	docker rm --force \
-	  dev-postgres-bluth-co \
-	  dev-postgres-cyberdyne \
-	  dev-postgres-initech \
+	  dev-postgres-shard1 \
+	  dev-postgres-shard2 \
+	  dev-postgres-shard3 \
 	  dev-postgres-veneer
 	docker network rm dev-network-ppp || true
 
@@ -136,15 +136,15 @@ show-logs-veneer:
 
 .PHONY: show-logs-bluth-co
 show-logs-bluth-co:
-	@DB_CONTAINER_NAME=dev-postgres-bluth-co ./_bin/show_db_logs.sh
+	@DB_CONTAINER_NAME=dev-postgres-shard1 ./_bin/show_db_logs.sh
 
 .PHONY: show-logs-cyberdyne
 show-logs-cyberdyne:
-	@DB_CONTAINER_NAME=dev-postgres-cyberdyne ./_bin/show_db_logs.sh
+	@DB_CONTAINER_NAME=dev-postgres-shard2 ./_bin/show_db_logs.sh
 
 .PHONY: show-logs-initech
 show-logs-initech:
-	@DB_CONTAINER_NAME=dev-postgres-initech ./_bin/show_db_logs.sh
+	@DB_CONTAINER_NAME=dev-postgres-shard3 ./_bin/show_db_logs.sh
 
 ################################################################################
 # Internal / Doctor Targets
