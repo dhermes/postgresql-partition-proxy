@@ -12,12 +12,9 @@ if [ -z "${DB_CONTAINER_NAME}" ]; then
   exit 1
 fi
 
-LOG_FILES=$(docker exec "${DB_CONTAINER_NAME}" ls -1 /var/lib/postgresql/data/pg_log)
-LOG_FILE_COUNT=$(echo "${LOG_FILES}" | wc -l | tr -d '[:space:]')
-if [[ "${LOG_FILE_COUNT}" != "1" ]]; then
-  echo "Error: Found ${LOG_FILE_COUNT} log files, expected 1." >&2
-  exit 1
-fi
-
-LOG_FILE="/var/lib/postgresql/data/pg_log/${LOG_FILES}"
-docker exec "${DB_CONTAINER_NAME}" cat "${LOG_FILE}"
+# NOTE: We assume the lexicographic log files are sorted correctly.
+LOG_FILES=$(docker exec "${DB_CONTAINER_NAME}" ls -1 /var/lib/postgresql/data/pg_log | sort)
+for LOG_FILE in ${LOG_FILES}
+do
+  docker exec "${DB_CONTAINER_NAME}" cat "/var/lib/postgresql/data/pg_log/${LOG_FILE}"
+done
