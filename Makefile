@@ -44,6 +44,12 @@ clean:
 	rm -fr \
 	  terraform/workspaces/databases/.terraform/ \
 	  terraform/workspaces/docker/.terraform/
+	docker rm --force \
+	  dev-postgres-bluth-co \
+	  dev-postgres-cyberdyne \
+	  dev-postgres-initech \
+	  dev-postgres-veneer
+	docker network rm dev-network-ppp || true
 
 .PHONY: shellcheck
 shellcheck: _require-shellcheck
