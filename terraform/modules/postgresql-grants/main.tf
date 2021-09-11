@@ -53,3 +53,8 @@ resource "postgresql_default_privileges" "app_seq_grant" {
   object_type = "sequence"
   privileges  = ["SELECT", "UPDATE"]
 }
+
+resource "postgresql_extension" "pgcrypto" {
+  name     = "pgcrypto"
+  database = var.db_name
+}

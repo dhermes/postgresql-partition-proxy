@@ -2,6 +2,9 @@
 help:
 	@echo 'Makefile for `postgresql-partition-proxy` experiment'
 	@echo ''
+	@echo 'Usage:'
+	@echo '   make vet                          Run `go vet` over project source tree'
+	@echo '   make shellcheck                   Run `shellcheck` on all shell files in `./_bin/`'
 	@echo 'Terraform-specific Targets:'
 	@echo '   make start-containers        Start PostgreSQL Docker containers.'
 	@echo '   make stop-containers         Stop PostgreSQL Docker containers.'
@@ -12,16 +15,25 @@ help:
 	@echo '   make psql-bluth-co           Connects to currently running Bluth Co PostgreSQL DB via `psql` as app user'
 	@echo '   make psql-cyberdyne          Connects to currently running Cyberdyne PostgreSQL DB via `psql` as app user'
 	@echo '   make psql-initech            Connects to currently running Initech PostgreSQL DB via `psql` as app user'
+	@echo '   make migrations-bluth-co     Runs database schema migrations in Bluth Co PostgreSQL DB'
+	@echo '   make migrations-cyberdyne    Runs database schema migrations in Cyberdyne PostgreSQL DB'
+	@echo '   make migrations-initech      Runs database schema migrations in Initech PostgreSQL DB'
+	@echo '   make migrations              Runs database schema migrations in all PostgreSQL DB instances'
 	@echo ''
 
 ################################################################################
 # Meta-variables
 ################################################################################
+SHELLCHECK_PRESENT := $(shell command -v shellcheck 2> /dev/null)
 PSQL_PRESENT := $(shell command -v psql 2> /dev/null)
 
 ################################################################################
 # Terraform-specific Targets
 ################################################################################
+
+.PHONY: shellcheck
+shellcheck: _require-shellcheck
+	shellcheck --exclude SC1090,SC1091 ./_bin/*.sh
 
 .PHONY: start-containers
 start-containers:
@@ -57,19 +69,46 @@ psql-veneer: _require-psql
 
 .PHONY: psql-bluth-co
 psql-bluth-co: _require-psql
-	psql "postgres://bluth_co_app:5678efgh@localhost:29948/bluth_co"
+	PGOPTIONS="-c search_path=bluth_co" psql "postgres://bluth_co_app:5678efgh@localhost:29948/bluth_co"
 
 .PHONY: psql-cyberdyne
 psql-cyberdyne: _require-psql
-	psql "postgres://cyberdyne_app:9012ijkl@localhost:13366/cyberdyne"
+	PGOPTIONS="-c search_path=cyberdyne" psql "postgres://cyberdyne_app:9012ijkl@localhost:13366/cyberdyne"
 
 .PHONY: psql-initech
 psql-initech: _require-psql
-	psql "postgres://initech_app:3456mnop@localhost:11033/initech"
+	PGOPTIONS="-c search_path=initech" psql "postgres://initech_app:3456mnop@localhost:11033/initech"
+
+.PHONY: migrations-bluth-co
+migrations-bluth-co: _require-psql
+	PGOPTIONS="-c search_path=bluth_co" psql "postgres://bluth_co_admin:efgh5678@localhost:29948/bluth_co" --file ./migrations/0001_create_authors_table.sql
+	PGOPTIONS="-c search_path=bluth_co" psql "postgres://bluth_co_admin:efgh5678@localhost:29948/bluth_co" --file ./migrations/0002_create_books_table.sql
+	PGOPTIONS="-c search_path=bluth_co" psql "postgres://bluth_co_admin:efgh5678@localhost:29948/bluth_co" --file ./migrations/0003_seed_tables.sql
+
+.PHONY: migrations-cyberdyne
+migrations-cyberdyne: _require-psql
+	PGOPTIONS="-c search_path=cyberdyne" psql "postgres://cyberdyne_admin:ijkl9012@localhost:13366/cyberdyne" --file ./migrations/0001_create_authors_table.sql
+	PGOPTIONS="-c search_path=cyberdyne" psql "postgres://cyberdyne_admin:ijkl9012@localhost:13366/cyberdyne" --file ./migrations/0002_create_books_table.sql
+	PGOPTIONS="-c search_path=cyberdyne" psql "postgres://cyberdyne_admin:ijkl9012@localhost:13366/cyberdyne" --file ./migrations/0003_seed_tables.sql
+
+.PHONY: migrations-initech
+migrations-initech: _require-psql
+	PGOPTIONS="-c search_path=initech" psql "postgres://initech_admin:mnop3456@localhost:11033/initech" --file ./migrations/0001_create_authors_table.sql
+	PGOPTIONS="-c search_path=initech" psql "postgres://initech_admin:mnop3456@localhost:11033/initech" --file ./migrations/0002_create_books_table.sql
+	PGOPTIONS="-c search_path=initech" psql "postgres://initech_admin:mnop3456@localhost:11033/initech" --file ./migrations/0003_seed_tables.sql
+
+.PHONY: migrations
+migrations: migrations-bluth-co migrations-cyberdyne migrations-initech
 
 ################################################################################
 # Internal / Doctor Targets
 ################################################################################
+
+.PHONY: _require-shellcheck
+_require-shellcheck:
+ifndef SHELLCHECK_PRESENT
+	$(error 'shellcheck is not installed, it can be installed via "apt-get install shellcheck" or "brew install shellcheck".')
+endif
 
 .PHONY: _require-psql
 _require-psql:
