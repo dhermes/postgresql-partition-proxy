@@ -99,8 +99,9 @@ migrations-initech: _require-psql
 
 .PHONY: migrations-veneer
 migrations-veneer: _require-psql
-	psql "postgres://veneer_admin:abcd1234@localhost:14797/veneer" --file ./migrations/fdw_0001_map_servers.sql
-	psql "postgres://veneer_admin:abcd1234@localhost:14797/veneer" --file ./migrations/fdw_0002_grants.sql
+	psql "postgres://veneer_admin:abcd1234@localhost:14797/veneer" --file ./migrations/fdw_0001_map_bluth_co.sql
+	psql "postgres://veneer_admin:abcd1234@localhost:14797/veneer" --file ./migrations/fdw_0002_map_cyberdyne.sql
+	psql "postgres://veneer_admin:abcd1234@localhost:14797/veneer" --file ./migrations/fdw_0003_map_initech.sql
 
 .PHONY: migrations
 migrations: migrations-bluth-co migrations-cyberdyne migrations-initech migrations-veneer

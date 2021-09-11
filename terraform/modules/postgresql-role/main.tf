@@ -4,4 +4,5 @@ resource "postgresql_role" "user" {
   login               = true
   encrypted_password  = true
   skip_reassign_owned = true
+  search_path         = var.search_path
 }

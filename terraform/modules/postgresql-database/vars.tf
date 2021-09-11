@@ -12,3 +12,9 @@ variable "app_password" {
   type        = string
   description = "The password to use for the newly created app user"
 }
+
+variable "search_path" {
+  type        = list(string)
+  default     = null
+  description = "The (optional) search path to use for both created roles"
+}
