@@ -15,9 +15,6 @@ help:
 	@echo '   make psql-bluth-co           Connects to currently running Bluth Co PostgreSQL DB via `psql` as app user'
 	@echo '   make psql-cyberdyne          Connects to currently running Cyberdyne PostgreSQL DB via `psql` as app user'
 	@echo '   make psql-initech            Connects to currently running Initech PostgreSQL DB via `psql` as app user'
-	@echo '   make migrations-bluth-co     Runs database schema migrations in Bluth Co PostgreSQL DB'
-	@echo '   make migrations-cyberdyne    Runs database schema migrations in Cyberdyne PostgreSQL DB'
-	@echo '   make migrations-initech      Runs database schema migrations in Initech PostgreSQL DB'
 	@echo '   make migrations              Runs database schema migrations in all PostgreSQL DB instances'
 	@echo ''
 
@@ -79,32 +76,32 @@ psql-cyberdyne: _require-psql
 psql-initech: _require-psql
 	PGOPTIONS="-c search_path=initech" psql "postgres://initech_app:3456mnop@localhost:11033/initech"
 
-.PHONY: migrations-bluth-co
-migrations-bluth-co: _require-psql
+.PHONY: _migrations-bluth-co
+_migrations-bluth-co: _require-psql
 	PGOPTIONS="-c search_path=bluth_co" psql "postgres://bluth_co_admin:efgh5678@localhost:29948/bluth_co" --file ./migrations/0001_create_authors_table.sql
 	PGOPTIONS="-c search_path=bluth_co" psql "postgres://bluth_co_admin:efgh5678@localhost:29948/bluth_co" --file ./migrations/0002_create_books_table.sql
 	PGOPTIONS="-c search_path=bluth_co" psql "postgres://bluth_co_admin:efgh5678@localhost:29948/bluth_co" --file ./migrations/0003_seed_tables.sql
 
-.PHONY: migrations-cyberdyne
-migrations-cyberdyne: _require-psql
+.PHONY: _migrations-cyberdyne
+_migrations-cyberdyne: _require-psql
 	PGOPTIONS="-c search_path=cyberdyne" psql "postgres://cyberdyne_admin:ijkl9012@localhost:13366/cyberdyne" --file ./migrations/0001_create_authors_table.sql
 	PGOPTIONS="-c search_path=cyberdyne" psql "postgres://cyberdyne_admin:ijkl9012@localhost:13366/cyberdyne" --file ./migrations/0002_create_books_table.sql
 	PGOPTIONS="-c search_path=cyberdyne" psql "postgres://cyberdyne_admin:ijkl9012@localhost:13366/cyberdyne" --file ./migrations/0003_seed_tables.sql
 
-.PHONY: migrations-initech
-migrations-initech: _require-psql
+.PHONY: _migrations-initech
+_migrations-initech: _require-psql
 	PGOPTIONS="-c search_path=initech" psql "postgres://initech_admin:mnop3456@localhost:11033/initech" --file ./migrations/0001_create_authors_table.sql
 	PGOPTIONS="-c search_path=initech" psql "postgres://initech_admin:mnop3456@localhost:11033/initech" --file ./migrations/0002_create_books_table.sql
 	PGOPTIONS="-c search_path=initech" psql "postgres://initech_admin:mnop3456@localhost:11033/initech" --file ./migrations/0003_seed_tables.sql
 
-.PHONY: migrations-veneer
-migrations-veneer: _require-psql
+.PHONY: _migrations-veneer
+_migrations-veneer: _require-psql
 	psql "postgres://veneer_admin:abcd1234@localhost:14797/veneer" --file ./migrations/fdw_0001_map_bluth_co.sql
 	psql "postgres://veneer_admin:abcd1234@localhost:14797/veneer" --file ./migrations/fdw_0002_map_cyberdyne.sql
 	psql "postgres://veneer_admin:abcd1234@localhost:14797/veneer" --file ./migrations/fdw_0003_map_initech.sql
 
 .PHONY: migrations
-migrations: migrations-bluth-co migrations-cyberdyne migrations-initech migrations-veneer
+migrations: _migrations-bluth-co _migrations-cyberdyne _migrations-initech _migrations-veneer
 
 ################################################################################
 # Internal / Doctor Targets

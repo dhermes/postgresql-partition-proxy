@@ -16,6 +16,9 @@ be sharded by tenant. Using PostgreSQL foreign data wrappers, we can
 $ make  # Or `make help`
 Makefile for `postgresql-partition-proxy` experiment
 
+Usage:
+   make vet                          Run `go vet` over project source tree
+   make shellcheck                   Run `shellcheck` on all shell files in `./_bin/`
 Terraform-specific Targets:
    make start-containers        Start PostgreSQL Docker containers.
    make stop-containers         Stop PostgreSQL Docker containers.
@@ -26,6 +29,7 @@ Development Database-specific Targets:
    make psql-bluth-co           Connects to currently running Bluth Co PostgreSQL DB via `psql` as app user
    make psql-cyberdyne          Connects to currently running Cyberdyne PostgreSQL DB via `psql` as app user
    make psql-initech            Connects to currently running Initech PostgreSQL DB via `psql` as app user
+   make migrations              Runs database schema migrations in all PostgreSQL DB instances
 
 ```
 
