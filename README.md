@@ -46,6 +46,9 @@ Development Database-specific Targets:
 ## Resources
 
 -   PostgreSQL's Foreign Data Wrapper [post][1] from thoughtbot
+-   Foreign Data Wrappers in PostgreSQL and a closer look at `postgres_fdw`
+    [post][3] from Percona
 
 [1]: https://thoughtbot.com/blog/postgres-foreign-data-wrapper
 [2]: IN_ACTION.md
+[3]: https://www.percona.com/blog/2018/08/21/foreign-data-wrappers-postgresql-postgres_fdw/
