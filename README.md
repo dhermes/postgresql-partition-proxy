@@ -31,14 +31,14 @@ Terraform-specific Targets:
    make teardown-databases      Teardown the database, schema, roles and grants in the PostgreSQL instances
 Development Database-specific Targets:
    make psql-veneer             Connects to currently running Veneer PostgreSQL DB via `psql` as app user
-   make psql-bluth-co           Connects to currently running Bluth Co PostgreSQL DB via `psql` as app user
-   make psql-cyberdyne          Connects to currently running Cyberdyne PostgreSQL DB via `psql` as app user
-   make psql-initech            Connects to currently running Initech PostgreSQL DB via `psql` as app user
+   make psql-shard1             Connects to currently running Bluth Co PostgreSQL DB via `psql` as app user
+   make psql-shard2             Connects to currently running Cyberdyne PostgreSQL DB via `psql` as app user
+   make psql-shard3             Connects to currently running Initech PostgreSQL DB via `psql` as app user
    make migrations              Runs database schema migrations in all PostgreSQL DB instances
    make show-logs-veneer        Show log of all statements in Veneer PostgreSQL DB since starting.
-   make show-logs-bluth-co      Show log of all statements in Bluth Co PostgreSQL DB since starting.
-   make show-logs-cyberdyne     Show log of all statements in Cyberdyne PostgreSQL DB since starting.
-   make show-logs-initech       Show log of all statements in Initech PostgreSQL DB since starting.
+   make show-logs-shard1        Show log of all statements in Bluth Co PostgreSQL DB since starting.
+   make show-logs-shard2        Show log of all statements in Cyberdyne PostgreSQL DB since starting.
+   make show-logs-shard3        Show log of all statements in Initech PostgreSQL DB since starting.
 
 ```
 
