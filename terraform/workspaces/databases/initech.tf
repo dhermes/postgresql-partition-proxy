@@ -6,7 +6,7 @@ module "initech_database" {
   app_password   = "3456mnop"
 
   providers = {
-    postgresql = postgresql.initech
+    postgresql = postgresql.shard3
   }
 }
 
@@ -19,6 +19,6 @@ module "initech_grants" {
   app_role   = module.initech_database.app_role
 
   providers = {
-    postgresql = postgresql.initech
+    postgresql = postgresql.shard3
   }
 }

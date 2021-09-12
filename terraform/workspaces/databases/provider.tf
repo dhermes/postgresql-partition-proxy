@@ -10,7 +10,7 @@ provider "postgresql" {
 }
 
 provider "postgresql" {
-  alias     = "bluth_co"
+  alias     = "shard1"
   host      = "127.0.0.1"
   port      = 29948
   database  = "superuser_db"
@@ -21,7 +21,7 @@ provider "postgresql" {
 }
 
 provider "postgresql" {
-  alias     = "cyberdyne"
+  alias     = "shard2"
   host      = "127.0.0.1"
   port      = 13366
   database  = "superuser_db"
@@ -32,7 +32,7 @@ provider "postgresql" {
 }
 
 provider "postgresql" {
-  alias     = "initech"
+  alias     = "shard3"
   host      = "127.0.0.1"
   port      = 11033
   database  = "superuser_db"

@@ -6,7 +6,7 @@ module "cyberdyne_database" {
   app_password   = "9012ijkl"
 
   providers = {
-    postgresql = postgresql.cyberdyne
+    postgresql = postgresql.shard2
   }
 }
 
@@ -19,6 +19,6 @@ module "cyberdyne_grants" {
   app_role   = module.cyberdyne_database.app_role
 
   providers = {
-    postgresql = postgresql.cyberdyne
+    postgresql = postgresql.shard2
   }
 }

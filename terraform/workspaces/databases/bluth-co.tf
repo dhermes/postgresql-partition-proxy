@@ -6,7 +6,7 @@ module "bluth_co_database" {
   app_password   = "5678efgh"
 
   providers = {
-    postgresql = postgresql.bluth_co
+    postgresql = postgresql.shard1
   }
 }
 
@@ -19,6 +19,6 @@ module "bluth_co_grants" {
   app_role   = module.bluth_co_database.app_role
 
   providers = {
-    postgresql = postgresql.bluth_co
+    postgresql = postgresql.shard1
   }
 }
