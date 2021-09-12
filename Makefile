@@ -123,9 +123,9 @@ _migrations-initech: _require-psql
 
 .PHONY: _migrations-veneer
 _migrations-veneer: _require-psql
-	psql "postgres://veneer_admin:abcd1234@localhost:14797/veneer" --file ./migrations/fdw-0001-map-bluth-co.sql
-	psql "postgres://veneer_admin:abcd1234@localhost:14797/veneer" --file ./migrations/fdw-0002-map-cyberdyne.sql
-	psql "postgres://veneer_admin:abcd1234@localhost:14797/veneer" --file ./migrations/fdw-0003-map-initech.sql
+	psql "postgres://veneer_admin:abcd1234@localhost:14797/veneer" --file ./migrations/fdw-0001-map-shard1.sql
+	psql "postgres://veneer_admin:abcd1234@localhost:14797/veneer" --file ./migrations/fdw-0002-map-shard2.sql
+	psql "postgres://veneer_admin:abcd1234@localhost:14797/veneer" --file ./migrations/fdw-0003-map-shard3.sql
 
 .PHONY: migrations
 migrations: _migrations-bluth-co _migrations-cyberdyne _migrations-initech _migrations-veneer
