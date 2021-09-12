@@ -97,7 +97,7 @@ psql-shard1: _require-psql
 
 .PHONY: psql-shard2
 psql-shard2: _require-psql
-	PGOPTIONS="-c search_path=cyberdyne" psql "postgres://cyberdyne_app:9012ijkl@localhost:13366/cyberdyne"
+	PGOPTIONS="-c search_path=cyberdyne" psql "postgres://bookstore_app:9012ijkl@localhost:13366/bookstore"
 
 .PHONY: psql-shard3
 psql-shard3: _require-psql
@@ -111,9 +111,9 @@ _migrations-shard1: _require-psql
 
 .PHONY: _migrations-shard2
 _migrations-shard2: _require-psql
-	PGOPTIONS="-c search_path=cyberdyne" psql "postgres://cyberdyne_admin:ijkl9012@localhost:13366/cyberdyne" --file ./migrations/0001-create-authors-table.sql
-	PGOPTIONS="-c search_path=cyberdyne" psql "postgres://cyberdyne_admin:ijkl9012@localhost:13366/cyberdyne" --file ./migrations/0002-create-books-table.sql
-	PGOPTIONS="-c search_path=cyberdyne" psql "postgres://cyberdyne_admin:ijkl9012@localhost:13366/cyberdyne" --file ./migrations/0003-seed-tables.sql
+	PGOPTIONS="-c search_path=cyberdyne" psql "postgres://bookstore_admin:ijkl9012@localhost:13366/bookstore" --file ./migrations/0001-create-authors-table.sql
+	PGOPTIONS="-c search_path=cyberdyne" psql "postgres://bookstore_admin:ijkl9012@localhost:13366/bookstore" --file ./migrations/0002-create-books-table.sql
+	PGOPTIONS="-c search_path=cyberdyne" psql "postgres://bookstore_admin:ijkl9012@localhost:13366/bookstore" --file ./migrations/0003-seed-tables.sql
 
 .PHONY: _migrations-shard3
 _migrations-shard3: _require-psql

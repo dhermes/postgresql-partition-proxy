@@ -13,7 +13,7 @@ module "shard1_database" {
 module "shard2_database" {
   source = "../../modules/postgresql-database"
 
-  db_name        = "cyberdyne"
+  db_name        = "bookstore"
   admin_password = "ijkl9012"
   app_password   = "9012ijkl"
 
