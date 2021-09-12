@@ -1,14 +1,14 @@
 BEGIN;
 ----
-DROP SERVER IF EXISTS cyberdyne_server CASCADE;
-CREATE SERVER cyberdyne_server
+DROP SERVER IF EXISTS shard2_server CASCADE;
+CREATE SERVER shard2_server
   FOREIGN DATA WRAPPER postgres_fdw
   OPTIONS (host 'dev-postgres-shard2.', port '5432', dbname 'cyberdyne');
 CREATE USER MAPPING FOR veneer_admin
-  SERVER cyberdyne_server
+  SERVER shard2_server
   OPTIONS (user 'cyberdyne_admin', password 'ijkl9012');
 CREATE USER MAPPING FOR veneer_app
-  SERVER cyberdyne_server
+  SERVER shard2_server
   OPTIONS (user 'cyberdyne_app', password '9012ijkl');
 ----
 do
@@ -23,7 +23,7 @@ end;
 $$;
 ----
 IMPORT FOREIGN SCHEMA cyberdyne
-  FROM SERVER cyberdyne_server
+  FROM SERVER shard2_server
   INTO cyberdyne;
 ----
 COMMIT;

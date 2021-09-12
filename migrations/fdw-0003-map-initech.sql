@@ -1,14 +1,14 @@
 BEGIN;
 ----
-DROP SERVER IF EXISTS initech_server CASCADE;
-CREATE SERVER initech_server
+DROP SERVER IF EXISTS shard3_server CASCADE;
+CREATE SERVER shard3_server
   FOREIGN DATA WRAPPER postgres_fdw
   OPTIONS (host 'dev-postgres-shard3.', port '5432', dbname 'initech');
 CREATE USER MAPPING FOR veneer_admin
-  SERVER initech_server
+  SERVER shard3_server
   OPTIONS (user 'initech_admin', password 'mnop3456');
 CREATE USER MAPPING FOR veneer_app
-  SERVER initech_server
+  SERVER shard3_server
   OPTIONS (user 'initech_app', password '3456mnop');
 ----
 do
@@ -23,7 +23,7 @@ end;
 $$;
 ----
 IMPORT FOREIGN SCHEMA initech
-  FROM SERVER initech_server
+  FROM SERVER shard3_server
   INTO initech;
 ----
 COMMIT;

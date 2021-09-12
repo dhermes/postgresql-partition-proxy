@@ -1,14 +1,14 @@
 BEGIN;
 ----
-DROP SERVER IF EXISTS bluth_co_server CASCADE;
-CREATE SERVER bluth_co_server
+DROP SERVER IF EXISTS shard1_server CASCADE;
+CREATE SERVER shard1_server
   FOREIGN DATA WRAPPER postgres_fdw
   OPTIONS (host 'dev-postgres-shard1.', port '5432', dbname 'bluth_co');
 CREATE USER MAPPING FOR veneer_admin
-  SERVER bluth_co_server
+  SERVER shard1_server
   OPTIONS (user 'bluth_co_admin', password 'efgh5678');
 CREATE USER MAPPING FOR veneer_app
-  SERVER bluth_co_server
+  SERVER shard1_server
   OPTIONS (user 'bluth_co_app', password '5678efgh');
 ----
 do
@@ -23,7 +23,7 @@ end;
 $$;
 ----
 IMPORT FOREIGN SCHEMA bluth_co
-  FROM SERVER bluth_co_server
+  FROM SERVER shard1_server
   INTO bluth_co;
 ----
 COMMIT;
