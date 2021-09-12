@@ -12,6 +12,7 @@ help:
 	@echo '   make teardown-databases      Teardown the database, schema, roles and grants in the PostgreSQL instances'
 	@echo 'Development Database-specific Targets:'
 	@echo '   make psql-veneer             Connects to currently running Veneer PostgreSQL DB via `psql` as app user'
+	@echo '   make psql-veneer-admin       Connects to currently running Veneer PostgreSQL DB via `psql` as admin user'
 	@echo '   make psql-shard1             Connects to currently running Bluth Co PostgreSQL DB via `psql` as app user'
 	@echo '   make psql-shard2             Connects to currently running Cyberdyne PostgreSQL DB via `psql` as app user'
 	@echo '   make psql-shard3             Connects to currently running Initech PostgreSQL DB via `psql` as app user'
@@ -90,6 +91,10 @@ teardown-databases:
 .PHONY: psql-veneer
 psql-veneer: _require-psql
 	psql "postgres://veneer_app:1234abcd@localhost:14797/veneer"
+
+.PHONY: psql-veneer-admin
+psql-veneer-admin: _require-psql
+	psql "postgres://veneer_admin:abcd1234@localhost:14797/veneer"
 
 .PHONY: psql-shard1
 psql-shard1: _require-psql

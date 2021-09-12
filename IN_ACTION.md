@@ -415,3 +415,205 @@ $ make show-logs-shard2
 2021-09-12 14:05:31.869 UTC 613e092b.c7 u:(bookstore_app) d:(bookstore) LOG:  statement: CLOSE c1
 2021-09-12 14:05:31.869 UTC 613e092b.c7 u:(bookstore_app) d:(bookstore) LOG:  statement: COMMIT TRANSACTION
 ```
+
+## How Do Transactions Work?
+
+In order to **forward** a transaction to a foreign server, PostgreSQL has
+to simultaneously coordinate transaction states on multiple different
+servers. To see the limits of this, let's execute a **failed** transaction
+that involves Veneer and Shards 1 and 3:
+
+```
+$ make psql-veneer
+psql "postgres://veneer_app:1234abcd@localhost:14797/veneer"
+psql (13.4, server 13.3)
+Type "help" for help.
+
+veneer=> BEGIN;
+BEGIN
+veneer=*> SELECT * FROM bluth_co.authors WHERE last_name = 'Vonnegut' FOR UPDATE;
+                  id                  | first_name | last_name
+--------------------------------------+------------+-----------
+ f187e655-5d40-49a9-9d5c-3cb51d67590a | Kurt       | Vonnegut
+(1 row)
+
+veneer=*> SELECT * FROM initech.authors WHERE last_name = 'Vonnegut' FOR UPDATE;
+                  id                  | first_name | last_name
+--------------------------------------+------------+-----------
+ 3b423fae-fde8-4116-b019-961995bdd4eb | Kurt       | Vonnegut
+(1 row)
+
+veneer=*> SET statement_timeout = '3s';
+SET
+veneer=*> SELECT pg_sleep(6);
+ERROR:  canceling statement due to statement timeout
+veneer=!> COMMIT;
+ROLLBACK
+veneer=> \q
+```
+
+Again a little bookkeeping, the shard not involved remains at the same
+checkpoint:
+
+```
+$ make show-logs-shard2
+...
+2021-09-12 14:05:31.869 UTC 613e092b.c7 u:(bookstore_app) d:(bookstore) LOG:  statement: COMMIT TRANSACTION
+```
+
+Then we can see how the same transaction propagated through the other through
+PostgreSQL instances:
+
+```
+
+$ make show-logs-veneer
+...
+2021-09-12 14:05:31.851 UTC 613e092a.f1 u:(veneer_app) d:(veneer) LOG:  statement: SELECT
+          c.id AS cyberdyne_id,
+          d.id AS dunder_mifflin_id,
+          c.first_name AS first_name,
+          c.last_name AS last_name
+        FROM
+          cyberdyne.authors AS c
+        INNER JOIN
+          dunder_mifflin.authors AS d
+        ON
+        c.first_name = d.first_name AND
+        c.last_name = d.last_name;
+2021-09-12 14:28:44.264 UTC 613e0e88.145 u:(veneer_app) d:(veneer) LOG:  statement: BEGIN;
+2021-09-12 14:28:50.738 UTC 613e0e88.145 u:(veneer_app) d:(veneer) LOG:  statement: SELECT pg_catalog.quote_ident(c.relname) FROM pg_catalog.pg_class c WHERE c.relkind IN ('r', 'S', 'v', 'm', 'f', 'p') AND substring(pg_catalog.quote_ident(c.relname),1,1)='b' AND pg_catalog.pg_table_is_visible(c.oid) AND c.relnamespace <> (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = 'pg_catalog')
+        UNION
+        SELECT pg_catalog.quote_ident(n.nspname) || '.' FROM pg_catalog.pg_namespace n WHERE substring(pg_catalog.quote_ident(n.nspname) || '.',1,1)='b' AND (SELECT pg_catalog.count(*) FROM pg_catalog.pg_namespace WHERE substring(pg_catalog.quote_ident(nspname) || '.',1,1) = substring('b',1,pg_catalog.length(pg_catalog.quote_ident(nspname))+1)) > 1
+        UNION
+        SELECT pg_catalog.quote_ident(n.nspname) || '.' || pg_catalog.quote_ident(c.relname) FROM pg_catalog.pg_class c, pg_catalog.pg_namespace n WHERE c.relnamespace = n.oid AND c.relkind IN ('r', 'S', 'v', 'm', 'f', 'p') AND substring(pg_catalog.quote_ident(n.nspname) || '.' || pg_catalog.quote_ident(c.relname),1,1)='b' AND substring(pg_catalog.quote_ident(n.nspname) || '.',1,1) = substring('b',1,pg_catalog.length(pg_catalog.quote_ident(n.nspname))+1) AND (SELECT pg_catalog.count(*) FROM pg_catalog.pg_namespace WHERE substring(pg_catalog.quote_ident(nspname) || '.',1,1) = substring('b',1,pg_catalog.length(pg_catalog.quote_ident(nspname))+1)) = 1
+        LIMIT 1000
+2021-09-12 14:28:52.443 UTC 613e0e88.145 u:(veneer_app) d:(veneer) LOG:  statement: SELECT pg_catalog.quote_ident(c.relname) FROM pg_catalog.pg_class c WHERE c.relkind IN ('r', 'S', 'v', 'm', 'f', 'p') AND substring(pg_catalog.quote_ident(c.relname),1,11)='bluth_co.au' AND pg_catalog.pg_table_is_visible(c.oid) AND c.relnamespace <> (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = 'pg_catalog')
+        UNION
+        SELECT pg_catalog.quote_ident(n.nspname) || '.' FROM pg_catalog.pg_namespace n WHERE substring(pg_catalog.quote_ident(n.nspname) || '.',1,11)='bluth_co.au' AND (SELECT pg_catalog.count(*) FROM pg_catalog.pg_namespace WHERE substring(pg_catalog.quote_ident(nspname) || '.',1,11) = substring('bluth_co.au',1,pg_catalog.length(pg_catalog.quote_ident(nspname))+1)) > 1
+        UNION
+        SELECT pg_catalog.quote_ident(n.nspname) || '.' || pg_catalog.quote_ident(c.relname) FROM pg_catalog.pg_class c, pg_catalog.pg_namespace n WHERE c.relnamespace = n.oid AND c.relkind IN ('r', 'S', 'v', 'm', 'f', 'p') AND substring(pg_catalog.quote_ident(n.nspname) || '.' || pg_catalog.quote_ident(c.relname),1,11)='bluth_co.au' AND substring(pg_catalog.quote_ident(n.nspname) || '.',1,11) = substring('bluth_co.au',1,pg_catalog.length(pg_catalog.quote_ident(n.nspname))+1) AND (SELECT pg_catalog.count(*) FROM pg_catalog.pg_namespace WHERE substring(pg_catalog.quote_ident(nspname) || '.',1,11) = substring('bluth_co.au',1,pg_catalog.length(pg_catalog.quote_ident(nspname))+1)) = 1
+        LIMIT 1000
+2021-09-12 14:29:46.138 UTC 613e0e88.145 u:(veneer_app) d:(veneer) LOG:  statement: SELECT * FROM bluth_co.authors WHERE last_name = 'Vonnegut' FOR UPDATE;
+2021-09-12 14:29:49.797 UTC 613e0e88.145 u:(veneer_app) d:(veneer) LOG:  statement: SELECT pg_catalog.quote_ident(c.relname) FROM pg_catalog.pg_class c WHERE c.relkind IN ('r', 'S', 'v', 'm', 'f', 'p') AND substring(pg_catalog.quote_ident(c.relname),1,3)='ini' AND pg_catalog.pg_table_is_visible(c.oid) AND c.relnamespace <> (SELECT oid FROM pg_catalog.pg_namespace WHERE nspname = 'pg_catalog')
+        UNION
+        SELECT pg_catalog.quote_ident(n.nspname) || '.' FROM pg_catalog.pg_namespace n WHERE substring(pg_catalog.quote_ident(n.nspname) || '.',1,3)='ini' AND (SELECT pg_catalog.count(*) FROM pg_catalog.pg_namespace WHERE substring(pg_catalog.quote_ident(nspname) || '.',1,3) = substring('ini',1,pg_catalog.length(pg_catalog.quote_ident(nspname))+1)) > 1
+        UNION
+        SELECT pg_catalog.quote_ident(n.nspname) || '.' || pg_catalog.quote_ident(c.relname) FROM pg_catalog.pg_class c, pg_catalog.pg_namespace n WHERE c.relnamespace = n.oid AND c.relkind IN ('r', 'S', 'v', 'm', 'f', 'p') AND substring(pg_catalog.quote_ident(n.nspname) || '.' || pg_catalog.quote_ident(c.relname),1,3)='ini' AND substring(pg_catalog.quote_ident(n.nspname) || '.',1,3) = substring('ini',1,pg_catalog.length(pg_catalog.quote_ident(n.nspname))+1) AND (SELECT pg_catalog.count(*) FROM pg_catalog.pg_namespace WHERE substring(pg_catalog.quote_ident(nspname) || '.',1,3) = substring('ini',1,pg_catalog.length(pg_catalog.quote_ident(nspname))+1)) = 1
+        LIMIT 1000
+2021-09-12 14:29:53.323 UTC 613e0e88.145 u:(veneer_app) d:(veneer) LOG:  statement: SELECT * FROM initech.authors WHERE last_name = 'Vonnegut' FOR UPDATE;
+2021-09-12 14:30:03.554 UTC 613e0e88.145 u:(veneer_app) d:(veneer) LOG:  statement: SET statement_timeout = '3s';
+2021-09-12 14:30:06.464 UTC 613e0e88.145 u:(veneer_app) d:(veneer) LOG:  statement: SELECT pg_sleep(6);
+2021-09-12 14:30:09.470 UTC 613e0e88.145 u:(veneer_app) d:(veneer) ERROR:  canceling statement due to statement timeout
+2021-09-12 14:30:09.470 UTC 613e0e88.145 u:(veneer_app) d:(veneer) STATEMENT:  SELECT pg_sleep(6);
+2021-09-12 14:30:13.810 UTC 613e0e88.145 u:(veneer_app) d:(veneer) LOG:  statement: COMMIT;
+$
+$ make show-logs-shard1
+...
+2021-09-12 13:55:43.007 UTC 613e06de.7c u:(bookstore_app) d:(bookstore) LOG:  statement: COMMIT TRANSACTION
+2021-09-12 14:29:46.149 UTC 613e0eda.10e u:(bookstore_app) d:(bookstore) LOG:  statement: SET search_path = pg_catalog
+2021-09-12 14:29:46.150 UTC 613e0eda.10e u:(bookstore_app) d:(bookstore) LOG:  statement: SET timezone = 'UTC'
+2021-09-12 14:29:46.150 UTC 613e0eda.10e u:(bookstore_app) d:(bookstore) LOG:  statement: SET datestyle = ISO
+2021-09-12 14:29:46.151 UTC 613e0eda.10e u:(bookstore_app) d:(bookstore) LOG:  statement: SET intervalstyle = postgres
+2021-09-12 14:29:46.151 UTC 613e0eda.10e u:(bookstore_app) d:(bookstore) LOG:  statement: SET extra_float_digits = 3
+2021-09-12 14:29:46.152 UTC 613e0eda.10e u:(bookstore_app) d:(bookstore) LOG:  statement: START TRANSACTION ISOLATION LEVEL REPEATABLE READ
+2021-09-12 14:29:46.153 UTC 613e0eda.10e u:(bookstore_app) d:(bookstore) LOG:  execute <unnamed>: DECLARE c1 CURSOR FOR
+        SELECT id, first_name, last_name FROM bluth_co.authors WHERE ((last_name = 'Vonnegut'::text)) FOR UPDATE
+2021-09-12 14:29:46.154 UTC 613e0eda.10e u:(bookstore_app) d:(bookstore) LOG:  statement: FETCH 100 FROM c1
+2021-09-12 14:29:46.155 UTC 613e0eda.10e u:(bookstore_app) d:(bookstore) LOG:  statement: CLOSE c1
+2021-09-12 14:30:09.472 UTC 613e0eda.10e u:(bookstore_app) d:(bookstore) LOG:  statement: ABORT TRANSACTION
+$
+$ make show-logs-shard3
+...
+2021-09-12 13:58:40.426 UTC 613e0790.8f u:(bookstore_app) d:(bookstore) LOG:  statement: COMMIT TRANSACTION
+2021-09-12 14:29:53.334 UTC 613e0ee1.109 u:(bookstore_app) d:(bookstore) LOG:  statement: SET search_path = pg_catalog
+2021-09-12 14:29:53.334 UTC 613e0ee1.109 u:(bookstore_app) d:(bookstore) LOG:  statement: SET timezone = 'UTC'
+2021-09-12 14:29:53.335 UTC 613e0ee1.109 u:(bookstore_app) d:(bookstore) LOG:  statement: SET datestyle = ISO
+2021-09-12 14:29:53.335 UTC 613e0ee1.109 u:(bookstore_app) d:(bookstore) LOG:  statement: SET intervalstyle = postgres
+2021-09-12 14:29:53.336 UTC 613e0ee1.109 u:(bookstore_app) d:(bookstore) LOG:  statement: SET extra_float_digits = 3
+2021-09-12 14:29:53.336 UTC 613e0ee1.109 u:(bookstore_app) d:(bookstore) LOG:  statement: START TRANSACTION ISOLATION LEVEL REPEATABLE READ
+2021-09-12 14:29:53.337 UTC 613e0ee1.109 u:(bookstore_app) d:(bookstore) LOG:  execute <unnamed>: DECLARE c2 CURSOR FOR
+        SELECT id, first_name, last_name FROM initech.authors WHERE ((last_name = 'Vonnegut'::text)) FOR UPDATE
+2021-09-12 14:29:53.339 UTC 613e0ee1.109 u:(bookstore_app) d:(bookstore) LOG:  statement: FETCH 100 FROM c2
+2021-09-12 14:29:53.339 UTC 613e0ee1.109 u:(bookstore_app) d:(bookstore) LOG:  statement: CLOSE c2
+2021-09-12 14:30:09.471 UTC 613e0ee1.109 u:(bookstore_app) d:(bookstore) LOG:  statement: ABORT TRANSACTION
+```
+
+## Foreign DDL
+
+Running a partitioned setup like this brings along new challenges. One
+of the largest challenges occurs when foreign table schemas need updating via
+DDL. This is because the DDL must be applied transactionally **on the shard**
+and within that transaction, the foreign table definition in Veneer should
+also be updated via `IMPORT FOREIGN SCHEMA`.
+
+Running DDL **on Veneer** is allowed, but it only applies to the foreign
+table:
+
+```
+$ make psql-veneer-admin
+psql "postgres://veneer_admin:abcd1234@localhost:14797/veneer"
+psql (13.4, server 13.3)
+Type "help" for help.
+
+veneer=> ALTER TABLE cyberdyne.books DROP COLUMN publish_date;
+ALTER TABLE
+veneer=> \d cyberdyne.books
+                        Foreign table "cyberdyne.books"
+  Column   | Type | Collation | Nullable | Default |        FDW options
+-----------+------+-----------+----------+---------+---------------------------
+ id        | uuid |           | not null |         | (column_name 'id')
+ title     | text |           | not null |         | (column_name 'title')
+ author_id | uuid |           |          |         | (column_name 'author_id')
+Server: shard2_server
+FDW options: (schema_name 'cyberdyne', table_name 'books')
+
+veneer=> \q
+```
+
+The corresponding table on Shard 2 was not impacted:
+
+```
+$ make psql-shard2
+psql "postgres://bookstore_app:9012ijkl@localhost:13366/bookstore"
+psql (13.4, server 13.3)
+Type "help" for help.
+
+bookstore=> \d cyberdyne.books
+               Table "cyberdyne.books"
+    Column    | Type | Collation | Nullable | Default
+--------------+------+-----------+----------+---------
+ id           | uuid |           | not null |
+ title        | text |           | not null |
+ author_id    | uuid |           |          |
+ publish_date | date |           |          |
+Indexes:
+    "books_pkey" PRIMARY KEY, btree (id)
+    "uq_books_author_title" UNIQUE CONSTRAINT, btree (author_id, title)
+Foreign-key constraints:
+    "books_author_id_fkey" FOREIGN KEY (author_id) REFERENCES cyberdyne.authors(id)
+
+bookstore=> \q
+```
+
+As a follow-up, restore the foreign table in Veneer:
+
+```
+$ make psql-veneer-admin
+psql "postgres://veneer_admin:abcd1234@localhost:14797/veneer"
+psql (13.4, server 13.3)
+Type "help" for help.
+
+veneer=> DROP FOREIGN TABLE cyberdyne.books;
+DROP FOREIGN TABLE
+veneer=> IMPORT FOREIGN SCHEMA cyberdyne
+veneer->   LIMIT TO (books)
+veneer->   FROM SERVER shard2_server
+veneer->   INTO cyberdyne;
+IMPORT FOREIGN SCHEMA
+veneer=> \q
+```
+
+Given the above observations, it's **crucial** for migrations to be safe
+for "old" and "new" versions of the code that interacts with the table.
+However, for deployment environments where rolling updates are the norm,
+this is already a requirement for migrations.
