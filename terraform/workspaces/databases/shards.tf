@@ -25,7 +25,7 @@ module "shard2_database" {
 module "shard3_database" {
   source = "../../modules/postgresql-database"
 
-  db_name        = "initech"
+  db_name        = "bookstore"
   admin_password = "mnop3456"
   app_password   = "3456mnop"
 

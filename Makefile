@@ -101,7 +101,7 @@ psql-shard2: _require-psql
 
 .PHONY: psql-shard3
 psql-shard3: _require-psql
-	PGOPTIONS="-c search_path=initech" psql "postgres://initech_app:3456mnop@localhost:11033/initech"
+	PGOPTIONS="-c search_path=initech" psql "postgres://bookstore_app:3456mnop@localhost:11033/bookstore"
 
 .PHONY: _migrations-shard1
 _migrations-shard1: _require-psql
@@ -117,9 +117,9 @@ _migrations-shard2: _require-psql
 
 .PHONY: _migrations-shard3
 _migrations-shard3: _require-psql
-	PGOPTIONS="-c search_path=initech" psql "postgres://initech_admin:mnop3456@localhost:11033/initech" --file ./migrations/0001-create-authors-table.sql
-	PGOPTIONS="-c search_path=initech" psql "postgres://initech_admin:mnop3456@localhost:11033/initech" --file ./migrations/0002-create-books-table.sql
-	PGOPTIONS="-c search_path=initech" psql "postgres://initech_admin:mnop3456@localhost:11033/initech" --file ./migrations/0003-seed-tables.sql
+	PGOPTIONS="-c search_path=initech" psql "postgres://bookstore_admin:mnop3456@localhost:11033/bookstore" --file ./migrations/0001-create-authors-table.sql
+	PGOPTIONS="-c search_path=initech" psql "postgres://bookstore_admin:mnop3456@localhost:11033/bookstore" --file ./migrations/0002-create-books-table.sql
+	PGOPTIONS="-c search_path=initech" psql "postgres://bookstore_admin:mnop3456@localhost:11033/bookstore" --file ./migrations/0003-seed-tables.sql
 
 .PHONY: _migrations-veneer
 _migrations-veneer: _require-psql
