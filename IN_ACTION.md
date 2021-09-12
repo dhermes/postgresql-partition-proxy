@@ -2,8 +2,9 @@
 
 ## Initialize PostgreSQL Instances
 
-First, start up the three "physical" shards (`bluth_co`, `cyberdyne` and
-`initech`) as well as the pass through (`veneer`):
+First, start up the three "physical" shards with four distinct tenants
+(`bluth_co`, `cyberdyne`, `dunder_mifflin` and `initech`) as well as the pass
+through (`veneer`):
 
 ```
 $ make start-containers
@@ -11,35 +12,35 @@ $ make start-containers
 Apply complete! Resources: 9 added, 0 changed, 0 destroyed.
 $
 $ docker ps
-CONTAINER ID   IMAGE                      COMMAND                  CREATED              STATUS              PORTS                     NAMES
-997480aa097e   postgres:13.3-alpine3.14   "docker-entrypoint.s…"   About a minute ago   Up About a minute   0.0.0.0:14797->5432/tcp   dev-postgres-veneer
-0c94aa5e83b0   postgres:13.3-alpine3.14   "docker-entrypoint.s…"   About a minute ago   Up About a minute   0.0.0.0:29948->5432/tcp   dev-postgres-shard1
-ddb93e29b7af   postgres:13.3-alpine3.14   "docker-entrypoint.s…"   About a minute ago   Up About a minute   0.0.0.0:13366->5432/tcp   dev-postgres-shard2
-0d047aded5a6   postgres:13.3-alpine3.14   "docker-entrypoint.s…"   About a minute ago   Up About a minute   0.0.0.0:11033->5432/tcp   dev-postgres-shard3
+CONTAINER ID   IMAGE                      COMMAND                  CREATED          STATUS          PORTS                     NAMES
+2c4877b60a6e   postgres:13.3-alpine3.14   "docker-entrypoint.s…"   11 seconds ago   Up 9 seconds    0.0.0.0:29948->5432/tcp   dev-postgres-shard1
+f18a809da222   postgres:13.3-alpine3.14   "docker-entrypoint.s…"   11 seconds ago   Up 10 seconds   0.0.0.0:13366->5432/tcp   dev-postgres-shard2
+55c24efd29b4   postgres:13.3-alpine3.14   "docker-entrypoint.s…"   11 seconds ago   Up 10 seconds   0.0.0.0:11033->5432/tcp   dev-postgres-shard3
+01fb340eff73   postgres:13.3-alpine3.14   "docker-entrypoint.s…"   11 seconds ago   Up 10 seconds   0.0.0.0:14797->5432/tcp   dev-postgres-veneer
 ```
 
-Then actually create `{db}_admin` and `{db}_app` users in each PostgreSQL
-instance:
+Then actually create `bookstore_admin` and `bookstore_app` users in each
+PostgreSQL instance:
 
 ```
 $ make initialize-databases
 ...
-Apply complete! Resources: 60 added, 0 changed, 0 destroyed.
+Apply complete! Resources: 74 added, 0 changed, 0 destroyed.
 $
-$ make psql-bluth-co
-PGOPTIONS="-c search_path=bluth_co" psql "postgres://bluth_co_app:5678efgh@localhost:29948/bluth_co"
+$ make psql-shard1
+psql "postgres://bookstore_app:5678efgh@localhost:29948/bookstore"
 psql (13.4, server 13.3)
 Type "help" for help.
 
-bluth_co=> \dn
+bookstore=> \dn
       List of schemas
-   Name   |     Owner
-----------+----------------
- bluth_co | bluth_co_admin
+   Name   |      Owner
+----------+-----------------
+ bluth_co | bookstore_admin
  public   | superuser
 (2 rows)
 
-bluth_co=>  \q
+bookstore=> \q
 ```
 
 ## Simulation Application Lifecyle: Migrations
@@ -65,19 +66,25 @@ Type "help" for help.
 veneer=> SELECT pg_backend_pid(), * FROM bluth_co.authors WHERE first_name = 'Ernest';
  pg_backend_pid |                  id                  | first_name | last_name
 ----------------+--------------------------------------+------------+-----------
-            389 | ed62a6c5-3ebc-41ea-a63c-ba48c400068a | Ernest     | Hemingway
+            145 | 88073cf8-102c-4f6d-b1cf-8bfc809b951d | Ernest     | Hemingway
 (1 row)
 
 veneer=> SELECT pg_backend_pid(), * FROM cyberdyne.authors WHERE first_name = 'Ernest';
  pg_backend_pid |                  id                  | first_name | last_name
 ----------------+--------------------------------------+------------+-----------
-            389 | dd01165c-c228-48af-8017-5f75ac434394 | Ernest     | Hemingway
+            145 | 1b20af67-4fcb-4f99-ba57-bffce41f7970 | Ernest     | Hemingway
+(1 row)
+
+veneer=> SELECT pg_backend_pid(), * FROM dunder_mifflin.authors WHERE first_name = 'Ernest';
+ pg_backend_pid |                  id                  | first_name | last_name
+----------------+--------------------------------------+------------+-----------
+            145 | 8e87595c-6941-4082-9090-a2e8af2a9000 | Ernest     | Hemingway
 (1 row)
 
 veneer=> SELECT pg_backend_pid(), * FROM initech.authors WHERE first_name = 'Ernest';
  pg_backend_pid |                  id                  | first_name | last_name
 ----------------+--------------------------------------+------------+-----------
-            389 | c9927c3d-16ba-4d9a-91ce-45d8dd48d003 | Ernest     | Hemingway
+            145 | 48049ea7-f554-4d0f-870c-22419a993ed1 | Ernest     | Hemingway
 (1 row)
 
 veneer=> \q
@@ -96,19 +103,19 @@ a `JOIN`, we mark a logs checkpoint:
 ```
 $ make show-logs-veneer
 ...
-2021-09-11 07:25:05.485 UTC 613c59d1.f7 u:(veneer_admin) d:(veneer) LOG:  statement: COMMIT;
+2021-09-12 13:53:23.061 UTC 613e0634.91 u:(veneer_app) d:(veneer) LOG:  statement: SELECT pg_backend_pid(), * FROM initech.authors WHERE first_name = 'Ernest';
 $
-$ make show-logs-bluth-co
+$ make show-logs-shard1
 ...
-2021-09-11 07:25:05.240 UTC 613c59d1.99 u:(bluth_co_admin) d:(bluth_co) LOG:  statement: COMMIT TRANSACTION
+2021-09-12 13:53:09.001 UTC 613e0644.67 u:(bookstore_app) d:(bookstore) LOG:  statement: COMMIT TRANSACTION
 $
-$ make show-logs-cyberdyne
+$ make show-logs-shard2
 ...
-2021-09-11 07:25:05.366 UTC 613c59d1.98 u:(cyberdyne_admin) d:(cyberdyne) LOG:  statement: COMMIT TRANSACTION
+2021-09-12 13:53:17.115 UTC 613e0649.78 u:(bookstore_app) d:(bookstore) LOG:  statement: COMMIT TRANSACTION
 $
-$ make show-logs-initech
+$ make show-logs-shard3
 ...
-2021-09-11 07:25:05.486 UTC 613c59d1.96 u:(initech_admin) d:(initech) LOG:  statement: COMMIT TRANSACTION
+2021-09-12 13:53:23.078 UTC 613e0653.66 u:(bookstore_app) d:(bookstore) LOG:  statement: COMMIT TRANSACTION
 ```
 
 Now, we issue a `JOIN` query against two tables in the same physical
@@ -137,9 +144,9 @@ veneer-> WHERE
 veneer->   a.last_name = 'Rice';
               author_id               |               book_id                | author_first_name | author_last_name |           title            | publish_date
 --------------------------------------+--------------------------------------+-------------------+------------------+----------------------------+--------------
- d1539cff-2177-4fc4-b3f8-67b55a1f977b | 6886cfeb-fec7-403c-86f7-e1daa36fdb63 | Anne              | Rice             | The Wolf Gift              | 2012-02-14
- d1539cff-2177-4fc4-b3f8-67b55a1f977b | 4f12a7e7-72ec-41e3-a7f2-09e98ca1e51f | Anne              | Rice             | Interview with the Vampire | 1976-05-05
- d1539cff-2177-4fc4-b3f8-67b55a1f977b | 0af9b38c-0a4f-4720-b36d-2ec1d27b44e3 | Anne              | Rice             | The Queen of the Damned    | 1988-09-12
+ 54b44bc0-fb42-4937-a5f9-9be5a1bcb844 | 97f2477b-cd10-4474-8899-e19c07270f13 | Anne              | Rice             | The Wolf Gift              | 2012-02-14
+ 54b44bc0-fb42-4937-a5f9-9be5a1bcb844 | b2d43d29-3a64-4c0d-8741-db8c103db7ee | Anne              | Rice             | Interview with the Vampire | 1976-05-05
+ 54b44bc0-fb42-4937-a5f9-9be5a1bcb844 | 3537896e-47cc-4bda-a348-a11a56430d8a | Anne              | Rice             | The Queen of the Damned    | 1988-09-12
 (3 rows)
 
 veneer=> \q
@@ -148,13 +155,13 @@ veneer=> \q
 We can then check back in, first on the shards we didn't touch:
 
 ```
-$ make show-logs-cyberdyne
+$ make show-logs-shard2
 ...
-2021-09-11 07:25:05.366 UTC 613c59d1.98 u:(cyberdyne_admin) d:(cyberdyne) LOG:  statement: COMMIT TRANSACTION
+2021-09-12 13:53:17.115 UTC 613e0649.78 u:(bookstore_app) d:(bookstore) LOG:  statement: COMMIT TRANSACTION
 $
-$ make show-logs-initech
+$ make show-logs-shard3
 ...
-2021-09-11 07:25:05.486 UTC 613c59d1.96 u:(initech_admin) d:(initech) LOG:  statement: COMMIT TRANSACTION
+2021-09-12 13:53:23.078 UTC 613e0653.66 u:(bookstore_app) d:(bookstore) LOG:  statement: COMMIT TRANSACTION
 ```
 
 and then on the two we did:
@@ -162,8 +169,8 @@ and then on the two we did:
 ```
 $ make show-logs-veneer
 ...
-2021-09-11 07:25:05.485 UTC 613c59d1.f7 u:(veneer_admin) d:(veneer) LOG:  statement: COMMIT;
-2021-09-11 07:37:33.741 UTC 613c5bec.12f u:(veneer_app) d:(veneer) LOG:  statement: SELECT
+2021-09-12 13:53:23.061 UTC 613e0634.91 u:(veneer_app) d:(veneer) LOG:  statement: SELECT pg_backend_pid(), * FROM initech.authors WHERE first_name = 'Ernest';
+2021-09-12 13:55:42.987 UTC 613e06d9.b4 u:(veneer_app) d:(veneer) LOG:  statement: SELECT
           a.id AS author_id,
           b.id AS book_id,
           a.first_name AS author_first_name,
@@ -179,21 +186,23 @@ $ make show-logs-veneer
         WHERE
           a.last_name = 'Rice';
 $
-$ make show-logs-bluth-co
+$ make show-logs-shard1
 ...
-2021-09-11 07:25:05.240 UTC 613c59d1.99 u:(bluth_co_admin) d:(bluth_co) LOG:  statement: COMMIT TRANSACTION
-2021-09-11 07:37:33.767 UTC 613c5cbd.e9 u:(bluth_co_app) d:(bluth_co) LOG:  statement: SET search_path = pg_catalog
-2021-09-11 07:37:33.770 UTC 613c5cbd.e9 u:(bluth_co_app) d:(bluth_co) LOG:  statement: SET timezone = 'UTC'
-2021-09-11 07:37:33.773 UTC 613c5cbd.e9 u:(bluth_co_app) d:(bluth_co) LOG:  statement: SET datestyle = ISO
-2021-09-11 07:37:33.776 UTC 613c5cbd.e9 u:(bluth_co_app) d:(bluth_co) LOG:  statement: SET intervalstyle = postgres
-2021-09-11 07:37:33.779 UTC 613c5cbd.e9 u:(bluth_co_app) d:(bluth_co) LOG:  statement: SET extra_float_digits = 3
-2021-09-11 07:37:33.781 UTC 613c5cbd.e9 u:(bluth_co_app) d:(bluth_co) LOG:  statement: START TRANSACTION ISOLATION LEVEL REPEATABLE READ
-2021-09-11 07:37:33.785 UTC 613c5cbd.e9 u:(bluth_co_app) d:(bluth_co) LOG:  execute <unnamed>: DECLARE c1 CURSOR FOR
+2021-09-12 13:53:09.001 UTC 613e0644.67 u:(bookstore_app) d:(bookstore) LOG:  statement: COMMIT TRANSACTION
+2021-09-12 13:55:43.000 UTC 613e06de.7c u:(bookstore_app) d:(bookstore) LOG:  statement: SET search_path = pg_catalog
+2021-09-12 13:55:43.000 UTC 613e06de.7c u:(bookstore_app) d:(bookstore) LOG:  statement: SET timezone = 'UTC'
+2021-09-12 13:55:43.001 UTC 613e06de.7c u:(bookstore_app) d:(bookstore) LOG:  statement: SET datestyle = ISO
+2021-09-12 13:55:43.001 UTC 613e06de.7c u:(bookstore_app) d:(bookstore) LOG:  statement: SET intervalstyle = postgres
+2021-09-12 13:55:43.002 UTC 613e06de.7c u:(bookstore_app) d:(bookstore) LOG:  statement: SET extra_float_digits = 3
+2021-09-12 13:55:43.002 UTC 613e06de.7c u:(bookstore_app) d:(bookstore) LOG:  statement: START TRANSACTION ISOLATION LEVEL REPEATABLE READ
+2021-09-12 13:55:43.004 UTC 613e06de.7c u:(bookstore_app) d:(bookstore) LOG:  execute <unnamed>: DECLARE c1 CURSOR FOR
         SELECT r1.id, r2.id, r1.first_name, r1.last_name, r2.title, r2.publish_date FROM (bluth_co.authors r1 INNER JOIN bluth_co.books r2 ON (((r1.id = r2.author_id)) AND ((r1.last_name = 'Rice'::text))))
-2021-09-11 07:37:33.788 UTC 613c5cbd.e9 u:(bluth_co_app) d:(bluth_co) LOG:  statement: FETCH 100 FROM c1
-2021-09-11 07:37:33.791 UTC 613c5cbd.e9 u:(bluth_co_app) d:(bluth_co) LOG:  statement: CLOSE c1
-2021-09-11 07:37:33.793 UTC 613c5cbd.e9 u:(bluth_co_app) d:(bluth_co) LOG:  statement: COMMIT TRANSACTION
+2021-09-12 13:55:43.006 UTC 613e06de.7c u:(bookstore_app) d:(bookstore) LOG:  statement: FETCH 100 FROM c1
+2021-09-12 13:55:43.007 UTC 613e06de.7c u:(bookstore_app) d:(bookstore) LOG:  statement: CLOSE c1
+2021-09-12 13:55:43.007 UTC 613e06de.7c u:(bookstore_app) d:(bookstore) LOG:  statement: COMMIT TRANSACTION
 ```
+
+## Foreign `JOIN`; Different Shard
 
 To contrast, if we do a `JOIN` for tables on two distinct physical
 shards (which should be **ILLEGAL** as an operation in a multitenant system):
@@ -218,24 +227,24 @@ veneer->   c.first_name = i.first_name AND
 veneer->   c.last_name = i.last_name;
              cyberdyne_id             |              initech_id              | first_name | last_name
 --------------------------------------+--------------------------------------+------------+-----------
- 3ccff0b6-cdbd-4e23-8614-e48c3abce325 | b7c833c7-f62a-4e57-bccf-c21d3f75f79b | Agatha     | Christie
- 2c33a706-e53b-4d9f-a37e-bb1179b74fca | 770fbcbe-abdc-4aed-a5b9-edcfbf21012b | Anne       | Rice
- dd01165c-c228-48af-8017-5f75ac434394 | c9927c3d-16ba-4d9a-91ce-45d8dd48d003 | Ernest     | Hemingway
- a575526a-831e-47c3-b069-9778238496db | 19610e44-a291-4dea-b76b-e5a0b6177624 | JK         | Rowling
- 1209bdc8-d534-4f4f-85b5-beeca44ec200 | 7683f2fd-1288-404b-9dd6-ff47e2cad12d | James      | Joyce
- be29945e-c623-4188-a751-37435e1067ef | b1096d5b-d97b-4a8a-8f4c-2ef4b21b11a7 | John       | Steinbeck
- ef62d3a5-d73b-493b-affb-817ee1658ef2 | 97a1c52d-0695-4d2a-89ee-2589a15252bb | Kurt       | Vonnegut
+ 9edcf97d-5c7a-46f4-9e44-4575955f2529 | dd1608ad-b6fe-4ba0-b1a4-121c5ce582d3 | Agatha     | Christie
+ 5b64e1bb-679c-4f1d-9d8e-0ec500be5bf7 | a1497bbb-974d-4ded-ab8f-84a9ff7b2f27 | Anne       | Rice
+ 1b20af67-4fcb-4f99-ba57-bffce41f7970 | 48049ea7-f554-4d0f-870c-22419a993ed1 | Ernest     | Hemingway
+ 41b8a3eb-4cea-4e41-beaf-f1e39c969311 | 883441f5-f23e-400b-b5b3-401b587397db | JK         | Rowling
+ 51184457-91b5-4258-80f8-dca717509b63 | d9c27241-35a5-49ef-bda8-a6d63f64b74e | James      | Joyce
+ eed464d9-7998-4884-813e-4c65cd9909ca | fe20a4ba-f286-4b5f-8b20-502efa2b68d4 | John       | Steinbeck
+ cec5b4f7-5b2e-403d-9bf9-a7bbf508d56b | 3b423fae-fde8-4116-b019-961995bdd4eb | Kurt       | Vonnegut
 (7 rows)
 
 veneer=> \q
 ```
 
-we see Bluth Co at the same checkpoint:
+we see Shard 1 at the same checkpoint we left off:
 
 ```
-$ make show-logs-bluth-co
+$ make show-logs-shard1
 ...
-2021-09-11 07:37:33.793 UTC 613c5cbd.e9 u:(bluth_co_app) d:(bluth_co) LOG:  statement: COMMIT TRANSACTION
+2021-09-12 13:55:43.007 UTC 613e06de.7c u:(bookstore_app) d:(bookstore) LOG:  statement: COMMIT TRANSACTION
 ```
 
 and the three shards involved in the `JOIN` show that only a basic
@@ -245,7 +254,7 @@ joined on the Veneer proxy):
 ```
 $ make show-logs-veneer
 ...
-2021-09-11 07:37:33.741 UTC 613c5bec.12f u:(veneer_app) d:(veneer) LOG:  statement: SELECT
+2021-09-12 13:55:42.987 UTC 613e06d9.b4 u:(veneer_app) d:(veneer) LOG:  statement: SELECT
           a.id AS author_id,
           b.id AS book_id,
           a.first_name AS author_first_name,
@@ -260,7 +269,7 @@ $ make show-logs-veneer
           a.id = b.author_id
         WHERE
           a.last_name = 'Rice';
-2021-09-11 07:45:03.825 UTC 613c5dc8.156 u:(veneer_app) d:(veneer) LOG:  statement: SELECT
+2021-09-12 13:58:40.391 UTC 613e078d.cd u:(veneer_app) d:(veneer) LOG:  statement: SELECT
           c.id AS cyberdyne_id,
           i.id AS initech_id,
           c.first_name AS first_name,
@@ -273,33 +282,136 @@ $ make show-logs-veneer
           c.first_name = i.first_name AND
           c.last_name = i.last_name;
 $
-$ make show-logs-cyberdyne
+$ make show-logs-shard2
 ...
-2021-09-11 07:25:05.366 UTC 613c59d1.98 u:(cyberdyne_admin) d:(cyberdyne) LOG:  statement: COMMIT TRANSACTION
-2021-09-11 07:45:03.858 UTC 613c5e7f.10b u:(cyberdyne_app) d:(cyberdyne) LOG:  statement: SET search_path = pg_catalog
-2021-09-11 07:45:03.860 UTC 613c5e7f.10b u:(cyberdyne_app) d:(cyberdyne) LOG:  statement: SET timezone = 'UTC'
-2021-09-11 07:45:03.861 UTC 613c5e7f.10b u:(cyberdyne_app) d:(cyberdyne) LOG:  statement: SET datestyle = ISO
-2021-09-11 07:45:03.864 UTC 613c5e7f.10b u:(cyberdyne_app) d:(cyberdyne) LOG:  statement: SET intervalstyle = postgres
-2021-09-11 07:45:03.865 UTC 613c5e7f.10b u:(cyberdyne_app) d:(cyberdyne) LOG:  statement: SET extra_float_digits = 3
-2021-09-11 07:45:03.867 UTC 613c5e7f.10b u:(cyberdyne_app) d:(cyberdyne) LOG:  statement: START TRANSACTION ISOLATION LEVEL REPEATABLE READ
-2021-09-11 07:45:03.905 UTC 613c5e7f.10b u:(cyberdyne_app) d:(cyberdyne) LOG:  execute <unnamed>: DECLARE c1 CURSOR FOR
+2021-09-12 13:53:17.115 UTC 613e0649.78 u:(bookstore_app) d:(bookstore) LOG:  statement: COMMIT TRANSACTION
+2021-09-12 13:58:40.404 UTC 613e0790.a3 u:(bookstore_app) d:(bookstore) LOG:  statement: SET search_path = pg_catalog
+2021-09-12 13:58:40.405 UTC 613e0790.a3 u:(bookstore_app) d:(bookstore) LOG:  statement: SET timezone = 'UTC'
+2021-09-12 13:58:40.405 UTC 613e0790.a3 u:(bookstore_app) d:(bookstore) LOG:  statement: SET datestyle = ISO
+2021-09-12 13:58:40.406 UTC 613e0790.a3 u:(bookstore_app) d:(bookstore) LOG:  statement: SET intervalstyle = postgres
+2021-09-12 13:58:40.406 UTC 613e0790.a3 u:(bookstore_app) d:(bookstore) LOG:  statement: SET extra_float_digits = 3
+2021-09-12 13:58:40.407 UTC 613e0790.a3 u:(bookstore_app) d:(bookstore) LOG:  statement: START TRANSACTION ISOLATION LEVEL REPEATABLE READ
+2021-09-12 13:58:40.420 UTC 613e0790.a3 u:(bookstore_app) d:(bookstore) LOG:  execute <unnamed>: DECLARE c1 CURSOR FOR
         SELECT id, first_name, last_name FROM cyberdyne.authors
-2021-09-11 07:45:03.908 UTC 613c5e7f.10b u:(cyberdyne_app) d:(cyberdyne) LOG:  statement: FETCH 100 FROM c1
-2021-09-11 07:45:03.917 UTC 613c5e7f.10b u:(cyberdyne_app) d:(cyberdyne) LOG:  statement: CLOSE c1
-2021-09-11 07:45:03.919 UTC 613c5e7f.10b u:(cyberdyne_app) d:(cyberdyne) LOG:  statement: COMMIT TRANSACTION
+2021-09-12 13:58:40.422 UTC 613e0790.a3 u:(bookstore_app) d:(bookstore) LOG:  statement: FETCH 100 FROM c1
+2021-09-12 13:58:40.425 UTC 613e0790.a3 u:(bookstore_app) d:(bookstore) LOG:  statement: CLOSE c1
+2021-09-12 13:58:40.426 UTC 613e0790.a3 u:(bookstore_app) d:(bookstore) LOG:  statement: COMMIT TRANSACTION
 $
-$ make show-logs-initech
+$ make show-logs-shard3
 ...
-2021-09-11 07:25:05.486 UTC 613c59d1.96 u:(initech_admin) d:(initech) LOG:  statement: COMMIT TRANSACTION
-2021-09-11 07:45:03.892 UTC 613c5e7f.130 u:(initech_app) d:(initech) LOG:  statement: SET search_path = pg_catalog
-2021-09-11 07:45:03.895 UTC 613c5e7f.130 u:(initech_app) d:(initech) LOG:  statement: SET timezone = 'UTC'
-2021-09-11 07:45:03.897 UTC 613c5e7f.130 u:(initech_app) d:(initech) LOG:  statement: SET datestyle = ISO
-2021-09-11 07:45:03.899 UTC 613c5e7f.130 u:(initech_app) d:(initech) LOG:  statement: SET intervalstyle = postgres
-2021-09-11 07:45:03.901 UTC 613c5e7f.130 u:(initech_app) d:(initech) LOG:  statement: SET extra_float_digits = 3
-2021-09-11 07:45:03.903 UTC 613c5e7f.130 u:(initech_app) d:(initech) LOG:  statement: START TRANSACTION ISOLATION LEVEL REPEATABLE READ
-2021-09-11 07:45:03.911 UTC 613c5e7f.130 u:(initech_app) d:(initech) LOG:  execute <unnamed>: DECLARE c2 CURSOR FOR
+2021-09-12 13:53:23.078 UTC 613e0653.66 u:(bookstore_app) d:(bookstore) LOG:  statement: COMMIT TRANSACTION
+2021-09-12 13:58:40.417 UTC 613e0790.8f u:(bookstore_app) d:(bookstore) LOG:  statement: SET search_path = pg_catalog
+2021-09-12 13:58:40.417 UTC 613e0790.8f u:(bookstore_app) d:(bookstore) LOG:  statement: SET timezone = 'UTC'
+2021-09-12 13:58:40.418 UTC 613e0790.8f u:(bookstore_app) d:(bookstore) LOG:  statement: SET datestyle = ISO
+2021-09-12 13:58:40.418 UTC 613e0790.8f u:(bookstore_app) d:(bookstore) LOG:  statement: SET intervalstyle = postgres
+2021-09-12 13:58:40.419 UTC 613e0790.8f u:(bookstore_app) d:(bookstore) LOG:  statement: SET extra_float_digits = 3
+2021-09-12 13:58:40.419 UTC 613e0790.8f u:(bookstore_app) d:(bookstore) LOG:  statement: START TRANSACTION ISOLATION LEVEL REPEATABLE READ
+2021-09-12 13:58:40.423 UTC 613e0790.8f u:(bookstore_app) d:(bookstore) LOG:  execute <unnamed>: DECLARE c2 CURSOR FOR
         SELECT id, first_name, last_name FROM initech.authors
-2021-09-11 07:45:03.913 UTC 613c5e7f.130 u:(initech_app) d:(initech) LOG:  statement: FETCH 100 FROM c2
-2021-09-11 07:45:03.915 UTC 613c5e7f.130 u:(initech_app) d:(initech) LOG:  statement: CLOSE c2
-2021-09-11 07:45:03.920 UTC 613c5e7f.130 u:(initech_app) d:(initech) LOG:  statement: COMMIT TRANSACTION
+2021-09-12 13:58:40.424 UTC 613e0790.8f u:(bookstore_app) d:(bookstore) LOG:  statement: FETCH 100 FROM c2
+2021-09-12 13:58:40.425 UTC 613e0790.8f u:(bookstore_app) d:(bookstore) LOG:  statement: CLOSE c2
+2021-09-12 13:58:40.426 UTC 613e0790.8f u:(bookstore_app) d:(bookstore) LOG:  statement: COMMIT TRANSACTION
+```
+
+## Foreign `JOIN`; Same Shard
+
+To contrast the previous example, let's do the same foreign `JOIN` but for
+`cyberdyne` and `dunder_mifflin`, which both reside on Shard 2.
+
+```
+$ make psql-veneer
+psql "postgres://veneer_app:1234abcd@localhost:14797/veneer"
+psql (13.4, server 13.3)
+Type "help" for help.
+
+veneer=> SELECT
+veneer->   c.id AS cyberdyne_id,
+veneer->   d.id AS dunder_mifflin_id,
+veneer->   c.first_name AS first_name,
+veneer->   c.last_name AS last_name
+veneer-> FROM
+veneer->   cyberdyne.authors AS c
+veneer-> INNER JOIN
+veneer->   dunder_mifflin.authors AS d
+veneer-> ON
+veneer->   c.first_name = d.first_name AND
+veneer->   c.last_name = d.last_name;
+             cyberdyne_id             |          dunder_mifflin_id           | first_name | last_name
+--------------------------------------+--------------------------------------+------------+-----------
+ 9edcf97d-5c7a-46f4-9e44-4575955f2529 | 6e5cf0df-cef5-4400-9b49-61801befa706 | Agatha     | Christie
+ 5b64e1bb-679c-4f1d-9d8e-0ec500be5bf7 | 6976da86-c262-47ba-bf37-576d0fcbe661 | Anne       | Rice
+ 1b20af67-4fcb-4f99-ba57-bffce41f7970 | 8e87595c-6941-4082-9090-a2e8af2a9000 | Ernest     | Hemingway
+ 41b8a3eb-4cea-4e41-beaf-f1e39c969311 | 65c46841-2348-498d-aeff-47a797532278 | JK         | Rowling
+ 51184457-91b5-4258-80f8-dca717509b63 | 813cec6f-04e9-4455-881d-cb282a6bee40 | James      | Joyce
+ eed464d9-7998-4884-813e-4c65cd9909ca | ce33cccd-2a14-4df5-b571-c8250f0c81e8 | John       | Steinbeck
+ cec5b4f7-5b2e-403d-9bf9-a7bbf508d56b | b8ba9c26-f3bc-4ba9-a6b8-bfb327960f1a | Kurt       | Vonnegut
+(7 rows)
+
+veneer=> \q
+```
+
+Again a little bookkeeping, the two shards not involved remain at the same
+checkpoint:
+
+```
+$ make show-logs-shard1
+...
+2021-09-12 13:55:43.007 UTC 613e06de.7c u:(bookstore_app) d:(bookstore) LOG:  statement: COMMIT TRANSACTION
+$
+$ make show-logs-shard3
+...
+2021-09-12 13:58:40.426 UTC 613e0790.8f u:(bookstore_app) d:(bookstore) LOG:  statement: COMMIT TRANSACTION
+```
+
+The Veneer and Shard 2 logs show that PostgreSQL is able to do the `JOIN` on
+the remote (Shard 2) even though the schemas differ. This matches what we
+already saw when joing `bluth_co.authors` and `bluth_co.books` from the same
+shard.
+
+```
+$ make show-logs-veneer
+...
+2021-09-12 13:58:40.391 UTC 613e078d.cd u:(veneer_app) d:(veneer) LOG:  statement: SELECT
+          c.id AS cyberdyne_id,
+          i.id AS initech_id,
+          c.first_name AS first_name,
+          c.last_name AS last_name
+        FROM
+          cyberdyne.authors AS c
+        INNER JOIN
+          initech.authors AS i
+        ON
+          c.first_name = i.first_name AND
+          c.last_name = i.last_name;
+2021-09-12 14:05:31.851 UTC 613e092a.f1 u:(veneer_app) d:(veneer) LOG:  statement: SELECT
+          c.id AS cyberdyne_id,
+          d.id AS dunder_mifflin_id,
+          c.first_name AS first_name,
+          c.last_name AS last_name
+        FROM
+          cyberdyne.authors AS c
+        INNER JOIN
+          dunder_mifflin.authors AS d
+        ON
+        c.first_name = d.first_name AND
+        c.last_name = d.last_name;
+$
+$ make show-logs-shard2
+...
+2021-09-12 13:58:40.426 UTC 613e0790.a3 u:(bookstore_app) d:(bookstore) LOG:  statement: COMMIT TRANSACTION
+2021-09-12 14:05:31.864 UTC 613e092b.c7 u:(bookstore_app) d:(bookstore) LOG:  statement: SET search_path = pg_catalog
+2021-09-12 14:05:31.864 UTC 613e092b.c7 u:(bookstore_app) d:(bookstore) LOG:  statement: SET timezone = 'UTC'
+2021-09-12 14:05:31.864 UTC 613e092b.c7 u:(bookstore_app) d:(bookstore) LOG:  statement: SET datestyle = ISO
+2021-09-12 14:05:31.865 UTC 613e092b.c7 u:(bookstore_app) d:(bookstore) LOG:  statement: SET intervalstyle = postgres
+2021-09-12 14:05:31.865 UTC 613e092b.c7 u:(bookstore_app) d:(bookstore) LOG:  statement: SET extra_float_digits = 3
+2021-09-12 14:05:31.865 UTC 613e092b.c7 u:(bookstore_app) d:(bookstore) LOG:  statement: START TRANSACTION ISOLATION LEVEL REPEATABLE READ
+2021-09-12 14:05:31.866 UTC 613e092b.c7 u:(bookstore_app) d:(bookstore) LOG:  execute <unnamed>: DECLARE c1 CURSOR FOR
+        SELECT id, first_name, last_name FROM cyberdyne.authors
+2021-09-12 14:05:31.867 UTC 613e092b.c7 u:(bookstore_app) d:(bookstore) LOG:  statement: FETCH 100 FROM c1
+2021-09-12 14:05:31.868 UTC 613e092b.c7 u:(bookstore_app) d:(bookstore) LOG:  execute <unnamed>: DECLARE c2 CURSOR FOR
+        SELECT id, first_name, last_name FROM dunder_mifflin.authors
+2021-09-12 14:05:31.869 UTC 613e092b.c7 u:(bookstore_app) d:(bookstore) LOG:  statement: FETCH 100 FROM c2
+2021-09-12 14:05:31.869 UTC 613e092b.c7 u:(bookstore_app) d:(bookstore) LOG:  statement: CLOSE c2
+2021-09-12 14:05:31.869 UTC 613e092b.c7 u:(bookstore_app) d:(bookstore) LOG:  statement: CLOSE c1
+2021-09-12 14:05:31.869 UTC 613e092b.c7 u:(bookstore_app) d:(bookstore) LOG:  statement: COMMIT TRANSACTION
 ```
