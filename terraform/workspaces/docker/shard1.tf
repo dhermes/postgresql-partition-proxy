@@ -1,4 +1,4 @@
-module "bluth_co" {
+module "shard1" {
   source = "../../modules/postgresql-container"
 
   port           = "29948"

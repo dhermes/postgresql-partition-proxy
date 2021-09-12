@@ -1,4 +1,4 @@
-module "cyberdyne" {
+module "shard2" {
   source = "../../modules/postgresql-container"
 
   port           = "13366"

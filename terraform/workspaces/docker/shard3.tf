@@ -1,4 +1,4 @@
-module "initech" {
+module "shard3" {
   source = "../../modules/postgresql-container"
 
   port           = "11033"
