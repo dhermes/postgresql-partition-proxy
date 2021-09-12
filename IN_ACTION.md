@@ -43,7 +43,7 @@ bookstore=> \dn
 bookstore=> \q
 ```
 
-## Simulation Application Lifecyle: Migrations
+## Simulate Application Lifecyle: Migrations
 
 Run the **data** migrations in the "physical" shards and run
 DDL (migrations) to set up the foreign data wrapper in `veneer`:
