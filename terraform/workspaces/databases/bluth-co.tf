@@ -1,15 +1,3 @@
-module "bluth_co_database" {
-  source = "../../modules/postgresql-database"
-
-  db_name        = "bluth_co"
-  admin_password = "efgh5678"
-  app_password   = "5678efgh"
-
-  providers = {
-    postgresql = postgresql.shard1
-  }
-}
-
 module "bluth_co_grants" {
   source = "../../modules/postgresql-grants"
 

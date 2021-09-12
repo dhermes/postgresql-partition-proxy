@@ -1,15 +1,3 @@
-module "initech_database" {
-  source = "../../modules/postgresql-database"
-
-  db_name        = "initech"
-  admin_password = "mnop3456"
-  app_password   = "3456mnop"
-
-  providers = {
-    postgresql = postgresql.shard3
-  }
-}
-
 module "initech_grants" {
   source = "../../modules/postgresql-grants"
 

@@ -1,15 +1,3 @@
-module "cyberdyne_database" {
-  source = "../../modules/postgresql-database"
-
-  db_name        = "cyberdyne"
-  admin_password = "ijkl9012"
-  app_password   = "9012ijkl"
-
-  providers = {
-    postgresql = postgresql.shard2
-  }
-}
-
 module "cyberdyne_grants" {
   source = "../../modules/postgresql-grants"
 
