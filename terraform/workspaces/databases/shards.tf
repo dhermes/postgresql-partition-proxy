@@ -1,4 +1,4 @@
-module "bluth_co_database" {
+module "shard1_database" {
   source = "../../modules/postgresql-database"
 
   db_name        = "bluth_co"
@@ -10,7 +10,7 @@ module "bluth_co_database" {
   }
 }
 
-module "cyberdyne_database" {
+module "shard2_database" {
   source = "../../modules/postgresql-database"
 
   db_name        = "cyberdyne"
@@ -22,7 +22,7 @@ module "cyberdyne_database" {
   }
 }
 
-module "initech_database" {
+module "shard3_database" {
   source = "../../modules/postgresql-database"
 
   db_name        = "initech"
