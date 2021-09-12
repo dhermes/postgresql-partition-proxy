@@ -3,13 +3,13 @@ BEGIN;
 DROP SERVER IF EXISTS shard1_server CASCADE;
 CREATE SERVER shard1_server
   FOREIGN DATA WRAPPER postgres_fdw
-  OPTIONS (host 'dev-postgres-shard1.', port '5432', dbname 'bluth_co');
+  OPTIONS (host 'dev-postgres-shard1.', port '5432', dbname 'bookstore');
 CREATE USER MAPPING FOR veneer_admin
   SERVER shard1_server
-  OPTIONS (user 'bluth_co_admin', password 'efgh5678');
+  OPTIONS (user 'bookstore_admin', password 'efgh5678');
 CREATE USER MAPPING FOR veneer_app
   SERVER shard1_server
-  OPTIONS (user 'bluth_co_app', password '5678efgh');
+  OPTIONS (user 'bookstore_app', password '5678efgh');
 ----
 do
 $$

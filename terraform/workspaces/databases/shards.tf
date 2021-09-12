@@ -1,7 +1,7 @@
 module "shard1_database" {
   source = "../../modules/postgresql-database"
 
-  db_name        = "bluth_co"
+  db_name        = "bookstore"
   admin_password = "efgh5678"
   app_password   = "5678efgh"
 

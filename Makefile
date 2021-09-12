@@ -93,7 +93,7 @@ psql-veneer: _require-psql
 
 .PHONY: psql-shard1
 psql-shard1: _require-psql
-	PGOPTIONS="-c search_path=bluth_co" psql "postgres://bluth_co_app:5678efgh@localhost:29948/bluth_co"
+	PGOPTIONS="-c search_path=bluth_co" psql "postgres://bookstore_app:5678efgh@localhost:29948/bookstore"
 
 .PHONY: psql-shard2
 psql-shard2: _require-psql
@@ -105,9 +105,9 @@ psql-shard3: _require-psql
 
 .PHONY: _migrations-shard1
 _migrations-shard1: _require-psql
-	PGOPTIONS="-c search_path=bluth_co" psql "postgres://bluth_co_admin:efgh5678@localhost:29948/bluth_co" --file ./migrations/0001-create-authors-table.sql
-	PGOPTIONS="-c search_path=bluth_co" psql "postgres://bluth_co_admin:efgh5678@localhost:29948/bluth_co" --file ./migrations/0002-create-books-table.sql
-	PGOPTIONS="-c search_path=bluth_co" psql "postgres://bluth_co_admin:efgh5678@localhost:29948/bluth_co" --file ./migrations/0003-seed-tables.sql
+	PGOPTIONS="-c search_path=bluth_co" psql "postgres://bookstore_admin:efgh5678@localhost:29948/bookstore" --file ./migrations/0001-create-authors-table.sql
+	PGOPTIONS="-c search_path=bluth_co" psql "postgres://bookstore_admin:efgh5678@localhost:29948/bookstore" --file ./migrations/0002-create-books-table.sql
+	PGOPTIONS="-c search_path=bluth_co" psql "postgres://bookstore_admin:efgh5678@localhost:29948/bookstore" --file ./migrations/0003-seed-tables.sql
 
 .PHONY: _migrations-shard2
 _migrations-shard2: _require-psql
