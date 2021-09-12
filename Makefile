@@ -105,27 +105,27 @@ psql-initech: _require-psql
 
 .PHONY: _migrations-bluth-co
 _migrations-bluth-co: _require-psql
-	PGOPTIONS="-c search_path=bluth_co" psql "postgres://bluth_co_admin:efgh5678@localhost:29948/bluth_co" --file ./migrations/0001_create_authors_table.sql
-	PGOPTIONS="-c search_path=bluth_co" psql "postgres://bluth_co_admin:efgh5678@localhost:29948/bluth_co" --file ./migrations/0002_create_books_table.sql
-	PGOPTIONS="-c search_path=bluth_co" psql "postgres://bluth_co_admin:efgh5678@localhost:29948/bluth_co" --file ./migrations/0003_seed_tables.sql
+	PGOPTIONS="-c search_path=bluth_co" psql "postgres://bluth_co_admin:efgh5678@localhost:29948/bluth_co" --file ./migrations/0001-create-authors-table.sql
+	PGOPTIONS="-c search_path=bluth_co" psql "postgres://bluth_co_admin:efgh5678@localhost:29948/bluth_co" --file ./migrations/0002-create-books-table.sql
+	PGOPTIONS="-c search_path=bluth_co" psql "postgres://bluth_co_admin:efgh5678@localhost:29948/bluth_co" --file ./migrations/0003-seed-tables.sql
 
 .PHONY: _migrations-cyberdyne
 _migrations-cyberdyne: _require-psql
-	PGOPTIONS="-c search_path=cyberdyne" psql "postgres://cyberdyne_admin:ijkl9012@localhost:13366/cyberdyne" --file ./migrations/0001_create_authors_table.sql
-	PGOPTIONS="-c search_path=cyberdyne" psql "postgres://cyberdyne_admin:ijkl9012@localhost:13366/cyberdyne" --file ./migrations/0002_create_books_table.sql
-	PGOPTIONS="-c search_path=cyberdyne" psql "postgres://cyberdyne_admin:ijkl9012@localhost:13366/cyberdyne" --file ./migrations/0003_seed_tables.sql
+	PGOPTIONS="-c search_path=cyberdyne" psql "postgres://cyberdyne_admin:ijkl9012@localhost:13366/cyberdyne" --file ./migrations/0001-create-authors-table.sql
+	PGOPTIONS="-c search_path=cyberdyne" psql "postgres://cyberdyne_admin:ijkl9012@localhost:13366/cyberdyne" --file ./migrations/0002-create-books-table.sql
+	PGOPTIONS="-c search_path=cyberdyne" psql "postgres://cyberdyne_admin:ijkl9012@localhost:13366/cyberdyne" --file ./migrations/0003-seed-tables.sql
 
 .PHONY: _migrations-initech
 _migrations-initech: _require-psql
-	PGOPTIONS="-c search_path=initech" psql "postgres://initech_admin:mnop3456@localhost:11033/initech" --file ./migrations/0001_create_authors_table.sql
-	PGOPTIONS="-c search_path=initech" psql "postgres://initech_admin:mnop3456@localhost:11033/initech" --file ./migrations/0002_create_books_table.sql
-	PGOPTIONS="-c search_path=initech" psql "postgres://initech_admin:mnop3456@localhost:11033/initech" --file ./migrations/0003_seed_tables.sql
+	PGOPTIONS="-c search_path=initech" psql "postgres://initech_admin:mnop3456@localhost:11033/initech" --file ./migrations/0001-create-authors-table.sql
+	PGOPTIONS="-c search_path=initech" psql "postgres://initech_admin:mnop3456@localhost:11033/initech" --file ./migrations/0002-create-books-table.sql
+	PGOPTIONS="-c search_path=initech" psql "postgres://initech_admin:mnop3456@localhost:11033/initech" --file ./migrations/0003-seed-tables.sql
 
 .PHONY: _migrations-veneer
 _migrations-veneer: _require-psql
-	psql "postgres://veneer_admin:abcd1234@localhost:14797/veneer" --file ./migrations/fdw_0001_map_bluth_co.sql
-	psql "postgres://veneer_admin:abcd1234@localhost:14797/veneer" --file ./migrations/fdw_0002_map_cyberdyne.sql
-	psql "postgres://veneer_admin:abcd1234@localhost:14797/veneer" --file ./migrations/fdw_0003_map_initech.sql
+	psql "postgres://veneer_admin:abcd1234@localhost:14797/veneer" --file ./migrations/fdw-0001-map-bluth-co.sql
+	psql "postgres://veneer_admin:abcd1234@localhost:14797/veneer" --file ./migrations/fdw-0002-map-cyberdyne.sql
+	psql "postgres://veneer_admin:abcd1234@localhost:14797/veneer" --file ./migrations/fdw-0003-map-initech.sql
 
 .PHONY: migrations
 migrations: _migrations-bluth-co _migrations-cyberdyne _migrations-initech _migrations-veneer
