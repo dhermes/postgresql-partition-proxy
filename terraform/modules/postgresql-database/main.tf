@@ -1,9 +1,8 @@
 module "admin_role" {
   source = "../postgresql-role"
 
-  username    = "${var.db_name}_admin"
-  password    = var.admin_password
-  search_path = var.search_path
+  username = "${var.db_name}_admin"
+  password = var.admin_password
 }
 
 resource "postgresql_database" "db" {
@@ -20,9 +19,8 @@ resource "postgresql_database" "db" {
 module "app_role" {
   source = "../postgresql-role"
 
-  username    = "${var.db_name}_app"
-  password    = var.app_password
-  search_path = var.search_path
+  username = "${var.db_name}_app"
+  password = var.app_password
 }
 
 resource "postgresql_extension" "pgcrypto" {

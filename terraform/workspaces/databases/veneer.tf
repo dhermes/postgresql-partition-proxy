@@ -4,7 +4,6 @@ module "veneer_database" {
   db_name        = "veneer"
   admin_password = "abcd1234"
   app_password   = "1234abcd"
-  search_path    = ["bluth_co", "cyberdyne", "initech", "$user", "public"]
 
   providers = {
     postgresql = postgresql.veneer
