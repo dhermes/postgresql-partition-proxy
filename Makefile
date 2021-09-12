@@ -132,19 +132,19 @@ migrations: _migrations-bluth-co _migrations-cyberdyne _migrations-initech _migr
 
 .PHONY: show-logs-veneer
 show-logs-veneer:
-	@DB_CONTAINER_NAME=dev-postgres-veneer ./_bin/show_db_logs.sh
+	@DB_CONTAINER_NAME=dev-postgres-veneer ./_bin/show-db-logs.sh
 
 .PHONY: show-logs-bluth-co
 show-logs-bluth-co:
-	@DB_CONTAINER_NAME=dev-postgres-shard1 ./_bin/show_db_logs.sh
+	@DB_CONTAINER_NAME=dev-postgres-shard1 ./_bin/show-db-logs.sh
 
 .PHONY: show-logs-cyberdyne
 show-logs-cyberdyne:
-	@DB_CONTAINER_NAME=dev-postgres-shard2 ./_bin/show_db_logs.sh
+	@DB_CONTAINER_NAME=dev-postgres-shard2 ./_bin/show-db-logs.sh
 
 .PHONY: show-logs-initech
 show-logs-initech:
-	@DB_CONTAINER_NAME=dev-postgres-shard3 ./_bin/show_db_logs.sh
+	@DB_CONTAINER_NAME=dev-postgres-shard3 ./_bin/show-db-logs.sh
 
 ################################################################################
 # Internal / Doctor Targets
