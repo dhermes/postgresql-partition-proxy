@@ -12,14 +12,14 @@ help:
 	@echo '   make teardown-databases      Teardown the database, schema, roles and grants in the PostgreSQL instances'
 	@echo 'Development Database-specific Targets:'
 	@echo '   make psql-veneer             Connects to currently running Veneer PostgreSQL DB via `psql` as app user'
-	@echo '   make psql-bluth-co           Connects to currently running Bluth Co PostgreSQL DB via `psql` as app user'
-	@echo '   make psql-cyberdyne          Connects to currently running Cyberdyne PostgreSQL DB via `psql` as app user'
-	@echo '   make psql-initech            Connects to currently running Initech PostgreSQL DB via `psql` as app user'
+	@echo '   make psql-shard1             Connects to currently running Bluth Co PostgreSQL DB via `psql` as app user'
+	@echo '   make psql-shard2             Connects to currently running Cyberdyne PostgreSQL DB via `psql` as app user'
+	@echo '   make psql-shard3             Connects to currently running Initech PostgreSQL DB via `psql` as app user'
 	@echo '   make migrations              Runs database schema migrations in all PostgreSQL DB instances'
 	@echo '   make show-logs-veneer        Show log of all statements in Veneer PostgreSQL DB since starting.'
-	@echo '   make show-logs-bluth-co      Show log of all statements in Bluth Co PostgreSQL DB since starting.'
-	@echo '   make show-logs-cyberdyne     Show log of all statements in Cyberdyne PostgreSQL DB since starting.'
-	@echo '   make show-logs-initech       Show log of all statements in Initech PostgreSQL DB since starting.'
+	@echo '   make show-logs-shard1        Show log of all statements in Bluth Co PostgreSQL DB since starting.'
+	@echo '   make show-logs-shard2        Show log of all statements in Cyberdyne PostgreSQL DB since starting.'
+	@echo '   make show-logs-shard3        Show log of all statements in Initech PostgreSQL DB since starting.'
 	@echo ''
 
 ################################################################################
@@ -91,32 +91,32 @@ teardown-databases:
 psql-veneer: _require-psql
 	psql "postgres://veneer_app:1234abcd@localhost:14797/veneer"
 
-.PHONY: psql-bluth-co
-psql-bluth-co: _require-psql
+.PHONY: psql-shard1
+psql-shard1: _require-psql
 	PGOPTIONS="-c search_path=bluth_co" psql "postgres://bluth_co_app:5678efgh@localhost:29948/bluth_co"
 
-.PHONY: psql-cyberdyne
-psql-cyberdyne: _require-psql
+.PHONY: psql-shard2
+psql-shard2: _require-psql
 	PGOPTIONS="-c search_path=cyberdyne" psql "postgres://cyberdyne_app:9012ijkl@localhost:13366/cyberdyne"
 
-.PHONY: psql-initech
-psql-initech: _require-psql
+.PHONY: psql-shard3
+psql-shard3: _require-psql
 	PGOPTIONS="-c search_path=initech" psql "postgres://initech_app:3456mnop@localhost:11033/initech"
 
-.PHONY: _migrations-bluth-co
-_migrations-bluth-co: _require-psql
+.PHONY: _migrations-shard1
+_migrations-shard1: _require-psql
 	PGOPTIONS="-c search_path=bluth_co" psql "postgres://bluth_co_admin:efgh5678@localhost:29948/bluth_co" --file ./migrations/0001-create-authors-table.sql
 	PGOPTIONS="-c search_path=bluth_co" psql "postgres://bluth_co_admin:efgh5678@localhost:29948/bluth_co" --file ./migrations/0002-create-books-table.sql
 	PGOPTIONS="-c search_path=bluth_co" psql "postgres://bluth_co_admin:efgh5678@localhost:29948/bluth_co" --file ./migrations/0003-seed-tables.sql
 
-.PHONY: _migrations-cyberdyne
-_migrations-cyberdyne: _require-psql
+.PHONY: _migrations-shard2
+_migrations-shard2: _require-psql
 	PGOPTIONS="-c search_path=cyberdyne" psql "postgres://cyberdyne_admin:ijkl9012@localhost:13366/cyberdyne" --file ./migrations/0001-create-authors-table.sql
 	PGOPTIONS="-c search_path=cyberdyne" psql "postgres://cyberdyne_admin:ijkl9012@localhost:13366/cyberdyne" --file ./migrations/0002-create-books-table.sql
 	PGOPTIONS="-c search_path=cyberdyne" psql "postgres://cyberdyne_admin:ijkl9012@localhost:13366/cyberdyne" --file ./migrations/0003-seed-tables.sql
 
-.PHONY: _migrations-initech
-_migrations-initech: _require-psql
+.PHONY: _migrations-shard3
+_migrations-shard3: _require-psql
 	PGOPTIONS="-c search_path=initech" psql "postgres://initech_admin:mnop3456@localhost:11033/initech" --file ./migrations/0001-create-authors-table.sql
 	PGOPTIONS="-c search_path=initech" psql "postgres://initech_admin:mnop3456@localhost:11033/initech" --file ./migrations/0002-create-books-table.sql
 	PGOPTIONS="-c search_path=initech" psql "postgres://initech_admin:mnop3456@localhost:11033/initech" --file ./migrations/0003-seed-tables.sql
@@ -128,22 +128,22 @@ _migrations-veneer: _require-psql
 	psql "postgres://veneer_admin:abcd1234@localhost:14797/veneer" --file ./migrations/fdw-0003-map-shard3.sql
 
 .PHONY: migrations
-migrations: _migrations-bluth-co _migrations-cyberdyne _migrations-initech _migrations-veneer
+migrations: _migrations-shard1 _migrations-shard2 _migrations-shard3 _migrations-veneer
 
 .PHONY: show-logs-veneer
 show-logs-veneer:
 	@DB_CONTAINER_NAME=dev-postgres-veneer ./_bin/show-db-logs.sh
 
-.PHONY: show-logs-bluth-co
-show-logs-bluth-co:
+.PHONY: show-logs-shard1
+show-logs-shard1:
 	@DB_CONTAINER_NAME=dev-postgres-shard1 ./_bin/show-db-logs.sh
 
-.PHONY: show-logs-cyberdyne
-show-logs-cyberdyne:
+.PHONY: show-logs-shard2
+show-logs-shard2:
 	@DB_CONTAINER_NAME=dev-postgres-shard2 ./_bin/show-db-logs.sh
 
-.PHONY: show-logs-initech
-show-logs-initech:
+.PHONY: show-logs-shard3
+show-logs-shard3:
 	@DB_CONTAINER_NAME=dev-postgres-shard3 ./_bin/show-db-logs.sh
 
 ################################################################################
