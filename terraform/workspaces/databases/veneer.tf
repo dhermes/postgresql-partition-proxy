@@ -55,6 +55,19 @@ module "veneer_cyberdyne_grants" {
   }
 }
 
+module "veneer_dunder_mifflin_grants" {
+  source = "../../modules/postgresql-grants"
+
+  schema     = "dunder_mifflin"
+  db_name    = module.veneer_database.db_name
+  admin_role = module.veneer_database.admin_role
+  app_role   = module.veneer_database.app_role
+
+  providers = {
+    postgresql = postgresql.veneer
+  }
+}
+
 module "veneer_initech_grants" {
   source = "../../modules/postgresql-grants"
 

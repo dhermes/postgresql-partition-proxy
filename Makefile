@@ -93,15 +93,15 @@ psql-veneer: _require-psql
 
 .PHONY: psql-shard1
 psql-shard1: _require-psql
-	PGOPTIONS="-c search_path=bluth_co" psql "postgres://bookstore_app:5678efgh@localhost:29948/bookstore"
+	psql "postgres://bookstore_app:5678efgh@localhost:29948/bookstore"
 
 .PHONY: psql-shard2
 psql-shard2: _require-psql
-	PGOPTIONS="-c search_path=cyberdyne" psql "postgres://bookstore_app:9012ijkl@localhost:13366/bookstore"
+	psql "postgres://bookstore_app:9012ijkl@localhost:13366/bookstore"
 
 .PHONY: psql-shard3
 psql-shard3: _require-psql
-	PGOPTIONS="-c search_path=initech" psql "postgres://bookstore_app:3456mnop@localhost:11033/bookstore"
+	psql "postgres://bookstore_app:3456mnop@localhost:11033/bookstore"
 
 .PHONY: _migrations-shard1
 _migrations-shard1: _require-psql
@@ -111,9 +111,12 @@ _migrations-shard1: _require-psql
 
 .PHONY: _migrations-shard2
 _migrations-shard2: _require-psql
-	PGOPTIONS="-c search_path=cyberdyne" psql "postgres://bookstore_admin:ijkl9012@localhost:13366/bookstore" --file ./migrations/0001-create-authors-table.sql
-	PGOPTIONS="-c search_path=cyberdyne" psql "postgres://bookstore_admin:ijkl9012@localhost:13366/bookstore" --file ./migrations/0002-create-books-table.sql
-	PGOPTIONS="-c search_path=cyberdyne" psql "postgres://bookstore_admin:ijkl9012@localhost:13366/bookstore" --file ./migrations/0003-seed-tables.sql
+	PGOPTIONS="-c search_path=cyberdyne"      psql "postgres://bookstore_admin:ijkl9012@localhost:13366/bookstore" --file ./migrations/0001-create-authors-table.sql
+	PGOPTIONS="-c search_path=cyberdyne"      psql "postgres://bookstore_admin:ijkl9012@localhost:13366/bookstore" --file ./migrations/0002-create-books-table.sql
+	PGOPTIONS="-c search_path=cyberdyne"      psql "postgres://bookstore_admin:ijkl9012@localhost:13366/bookstore" --file ./migrations/0003-seed-tables.sql
+	PGOPTIONS="-c search_path=dunder_mifflin" psql "postgres://bookstore_admin:ijkl9012@localhost:13366/bookstore" --file ./migrations/0001-create-authors-table.sql
+	PGOPTIONS="-c search_path=dunder_mifflin" psql "postgres://bookstore_admin:ijkl9012@localhost:13366/bookstore" --file ./migrations/0002-create-books-table.sql
+	PGOPTIONS="-c search_path=dunder_mifflin" psql "postgres://bookstore_admin:ijkl9012@localhost:13366/bookstore" --file ./migrations/0003-seed-tables.sql
 
 .PHONY: _migrations-shard3
 _migrations-shard3: _require-psql
