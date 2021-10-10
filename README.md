@@ -1,9 +1,9 @@
 # PPP: PostgreSQL Partition Proxy
 
 This is an attempt to show a small proof of concept where a single
-PostgreSQL can be used as a pass through into multiple distinct physical
-shards. The use case is multitenant systems where the data can easily
-be sharded by tenant. Using PostgreSQL foreign data wrappers, we can
+PostgreSQL instance can be used as a pass through into multiple distinct 
+physical shards. The use case is multitenant systems where the data can 
+easily be sharded by tenant. Using PostgreSQL foreign data wrappers, we can
 
 - Map a tenant onto a PostgreSQL schema in a straightforward way
 - Home the data for the tenant / schema on a single physical shard
